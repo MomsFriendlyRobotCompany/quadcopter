@@ -23,3 +23,18 @@ controller and the ESC on your quadcopter.
 - PCB – 4 Layer Blind hole PCB – 3oz Pour
 - Mosfet: N-Channel               
 - OneShot and BLHeli 16.2 Pre Installed
+
+## Timings
+
+Supports standar 1-2 msec RC servo timings at >= 50Hz
+
+- Minimum: 920 - 1050 usec (or 0.920 - 1.05 msec)
+- Middle: 1500 usec
+- Max 1800 - 2000 usec
+
+## Power ON Sequence
+
+1. Turn power on: 3 short rising tone beeps
+2. Set middle throttle: 1 long low tone beep
+3. Set zero throttle: 1 long high tone beep
+4. Motor is ready to command
