@@ -1,4 +1,4 @@
-# 2204 Brushless Motors 
+# 2204 Brushless Motors
 
 ## Features:
 
@@ -26,6 +26,8 @@ CW and CCW propeller adapters included, holding the propellers tight ;
 - Shaft : 3 MM
 - Propeller: 5″~6″             
 - Diameter: 27.9 MM
+- Silver hub: [CCW](https://hobbymatehobby.com/product/2204-2300kv-cw-brushless-motor-2204ccw-w/)
+- Black hub: [CW](https://hobbymatehobby.com/product/2204-2300kv-ccw-brushless-motor-2204ccw-b/)
 
 ![](pics/2204-front.jpg)
 
