@@ -32,3 +32,17 @@ CW and CCW propeller adapters included, holding the propellers tight ;
 ![](pics/2204-front.jpg)
 
 ![](pics/2204-back.jpg)
+
+# Kv (Constant Velocity)
+
+“Kv” refers to the constant velocity of a motor. It is measured by the number
+of revolutions per minute (rpm) that a motor turns when 1V (one volt) is
+applied with no load attached to that motor. The Kv rating of a brushless motor
+is the ratio of the motor’s unloaded rpm to the peak voltage on the wires
+connected to the coils.
+
+Knowing the Kv rating of a motor will help you determine how fast that motor will rotate when a given voltage is applied to it. For example:
+
+| a 980Kv motor powered by an 11.1V battery would spin at 10,878 rpm (980 x 11.1) with no load
+
+A change in voltage will change the rpm and will require changing the propeller to avoid overloading the motor. Kv allows you to get a handle on the torque that can be expected from a particular motor. Torque is determined by the number of winds on the armature and the strength of the magnets. A low Kv motor has more winds of thinner wire—it will carry more volts at fewer amps, produce higher torque, and swing a bigger prop. A high Kv motor has fewer winds of thicker wire that carry more amps at fewer volts and spin a smaller prop at high revolutions.
