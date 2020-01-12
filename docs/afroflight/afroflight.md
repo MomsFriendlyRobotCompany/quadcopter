@@ -1,10 +1,7 @@
 
-![](pics/1.jpg)
+![](pics/4.jpg)
 
 # Flight Controller
-
-**WARNING:** I have an F1 board of the STM32 and no one supports
-it anymore ... don't use!
 
 Designed for serious quad racers and freestyle maniacs, the AfroFlight Naze32 flight controller is undeniably the most used, recognised and supported flight controller in the scene today.
 
@@ -37,6 +34,22 @@ Includes:
 Naze 32 Rev6 board
 4 x sets of pins
 1 x RC Breakout cable
+
+![](pics/2.jpg)
+
+## Flashing the Board
+
+**WARNING:** I have an F1 board of the STM32 and no one supports
+it anymore ... don't use!
+
+**NOTE:** Ok, that said, if you use an older version of CleanFlight, it does work to an extent
+
+![](pics/3.jpg)
+
+- Install CleanFlight from the Google App Store
+- I also used baudrate of 115200
+- I flashed with CleanFlight 2.1 for the NAZE ... don't use the latest, it doesn't work
+  - Doesn't support everything like GPS
 
 # References
 
