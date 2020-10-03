@@ -13,7 +13,7 @@ controller and the ESC on your quadcopter.
 
 ## Specification:
 
-- Input: 2-4s Lipo                    
+- Input: 2-4s Lipo  (7.4V - 14.8V)                  
 - Constant: 15 Amps
 - Burst: 25 Amps                     
 - Weight: 4g bare board
