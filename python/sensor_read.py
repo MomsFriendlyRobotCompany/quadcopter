@@ -1,22 +1,31 @@
 #!/usr/bin/env python3
 import struct
 from serial import Serial
+import pickle
+from collections import deque
 
 imu = struct.Struct("<14fI")
 press = struct.Struct("<2f")
 
-def printIMU(payload):
-    msg = imu.unpack(payload)
+data = {
+    "imu": deque(),
+    "press": deque()
+}
 
+def printIMU(msg):
     print("-------------------")
     for m in msg:
         print(f"  {m}")
 
-def printMag(payload):
-    msg = press.unpack(payload)
-
+def printPressure(msg):
     print("-------------------")
     print(f"> {msg[0]:.3f} C   {msg[1]:.3f} Pa")
+
+def saveMsg(msgID, msg):
+    if msgID == 0xD0:
+        data["imu"].append(msg)
+    elif msgIX == 0xD1:
+        data["press"].append(msg)
 
 ###############################################################
 s = Serial()
@@ -37,15 +46,28 @@ try:
         if c != 0xFF: # reset to beginning if no 0xFF
             continue
 
-        msg, size = s.read(2)
-        if msg not in [0xD0]:
-            continue
+        msgID, size = s.read(2)
+        if msgID in [0xD0]:
+            # print(f"> size {size}, msg {msg}")
 
-        # print(f"> size {size}, msg {msg}")
-        payload = s.read(size)
-        printIMU(payload)
+            payload = s.read(size)
+            if msgID == 0xD0:
+                msg = imu.unpack(payload)
+                printIMU(msg)
+            if msgID == 0xD1:
+                msg = press.unpack(payload)
+                printPressure(msg)
+
+            saveMsg(msgID, msg)
+
 except KeyboardInterrupt:
     print("ctrl-c")
 
 finally:
     s.close()
+
+    if len(data["imu"]) > 0 or len(data["press"]) > 0:
+        filename = "data.pkl"
+        with open(filename,"wb") as fd:
+            pickle.dump(data, fd)
+        print(f">> Saved {len(data['imu'])} data points to {filename}")
