@@ -2,10 +2,10 @@
 
 # Hobbymate 15A ESC (BLHeli-15A)
 
-HOBBYMATE 15A ESCs have all the performance you would hope for and you will 
-struggle to find a frame small enough to fit these ESCs and they will still 
+HOBBYMATE 15A ESCs have all the performance you would hope for and you will
+struggle to find a frame small enough to fit these ESCs and they will still
 give you plenty of headroom on a standard 180 210 250 size quad!
-Oneshot125 is a different and faster communication protocol between the flight 
+Oneshot125 is a different and faster communication protocol between the flight
 controller and the ESC on your quadcopter.
 
 - Hobbymate 15A BLheli ESCs : Support OneShot ultra-high speed control and Bi-directional rotating. All N-FET design with external oscillator for steady performance across different thermal and voltage conditions.
@@ -13,20 +13,20 @@ controller and the ESC on your quadcopter.
 
 ## Specification:
 
-- Input: 2-4s Lipo  (7.4V - 14.8V)                  
+- Input: 2-4s Lipo  (7.4V - 14.8V)
 - Constant: 15 Amps
-- Burst: 25 Amps                     
+- Burst: 25 Amps
 - Weight: 4g bare board
-- Dimensions: 23×12.5x3mm  
+- Dimensions: 23×12.5x3mm
 - Motor wire: 70mm
-- Signal wire: 120mm              
+- Signal wire: 120mm
 - PCB – 4 Layer Blind hole PCB – 3oz Pour
-- Mosfet: N-Channel               
+- Mosfet: N-Channel
 - OneShot and BLHeli 16.2 Pre Installed
 
 ## Timings
 
-Supports standar 1-2 msec RC servo timings at >= 50Hz
+Supports standard 1-2 msec RC servo timings at >= 50Hz
 
 - Minimum: 920 - 1050 usec (or 0.920 - 1.05 msec)
 - Middle: 1500 usec
