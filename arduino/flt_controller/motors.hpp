@@ -26,19 +26,22 @@ Supports standard 1-2 msec RC servo timings at >= 50Hz
 
 */
 
-//-------Motor PWM Levels
-constexpr int MOTOR_ARM_START = 1500;
-constexpr int MOTOR_MAX_LEVEL = 1800;
+// ----- Motor PWM Levels -----
+constexpr int MOTOR_MAX_LEVEL  = 2000;
+constexpr int MOTOR_ZERO_LEVEL = 1000;
+constexpr int MOTOR_ARM_START  = 1500;
 
-constexpr int PIN_MOTOR0 = 0;
+// ----- Motor locations -----
+constexpr int PIN_MOTOR0 = 3;
 // constexpr int PIN_MOTOR1 = 0;
 // constexpr int PIN_MOTOR2 = 0;
 // constexpr int PIN_MOTOR3 = 0;
-constexpr int MOTOR_ZERO_LEVEL = 920;
 
 class QuadESC {
   public:
-    QuadESC() : armed(false) {}
+    QuadESC() : armed(false) {
+
+    }
 
     ~QuadESC() {
         if (armed)
@@ -56,34 +59,26 @@ class QuadESC {
         // motor3.detach();
     }
 
+    // move to constructor?
     void init() {
-        motor0.attach(PIN_MOTOR0);
+        motor0.attach(PIN_MOTOR0, 1000, 2000);
         // motor1.attach(PIN_MOTOR1);
         // motor2.attach(PIN_MOTOR2);
         // motor3.attach(PIN_MOTOR3);
-        motor0.writeMicroseconds(MOTOR_ZERO_LEVEL);
+        // motor0.writeMicroseconds(MOTOR_ARM_START);
         // motor1.writeMicroseconds(MOTOR_ZERO_LEVEL);
         // motor2.writeMicroseconds(MOTOR_ZERO_LEVEL);
         // motor3.writeMicroseconds(MOTOR_ZERO_LEVEL);
+        // delay(3000);
+        // motor0.writeMicroseconds(0);
+        // Serial.println("init done");
     }
 
     void arm() {
-        if (armed)
-            return;
-
-        motor0.writeMicroseconds(MOTOR_ARM_START);
-        // motor1.writeMicroseconds(MOTOR_ARM_START);
-        // motor2.writeMicroseconds(MOTOR_ARM_START);
-        // motor3.writeMicroseconds(MOTOR_ARM_START);
-
-        delay(1000);
-
-        motor0.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        // motor1.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        // motor2.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        // motor3.writeMicroseconds(MOTOR_ZERO_LEVEL);
-
-        armed = true;
+      motor0.writeMicroseconds(MOTOR_ARM_START);
+      delay(2000);
+      motor0.writeMicroseconds(MOTOR_ZERO_LEVEL);
+      delay(1000);
     }
 
     void set(int m0, int m1, int m2, int m3) {
@@ -101,3 +96,27 @@ class QuadESC {
 
     bool armed;
 };
+
+// void motor_ramp() {
+//     // ramp up to max
+//     for (int i=MOTOR_ZERO_LEVEL; i < MOTOR_MAX_LEVEL; i+=100){
+//       int val = i;
+//       motors.set(val,val,val,val);
+//       delay(500);
+//     }
+
+//     // ramp down to min
+//     for (int i=MOTOR_MAX_LEVEL; i > MOTOR_ZERO_LEVEL; i-=100){
+//       int val = i;
+//       motors.set(val,val,val,val);
+//       delay(500);
+//     }
+
+//     // set to 0
+//     int val = MOTOR_ZERO_LEVEL;
+//     motors.set(val,val,val,val);
+// }
+
+int motor_limit(const int val){
+    return val >= MOTOR_MAX_LEVEL ? MOTOR_MAX_LEVEL : val <= MOTOR_ZERO_LEVEL ? MOTOR_ZERO_LEVEL : val;
+}

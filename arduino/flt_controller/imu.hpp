@@ -33,7 +33,8 @@ class gciLSOXLIS {
 
     gciLSOXLIS()
         : found(false), soxFound(false), magFound(false),
-          bsize(numfloats * sizeof(float)), id(0xD0),
+          bsize(numfloats * sizeof(float)), 
+          id(0xD0),
           invg(1.0 / SENSORS_GRAVITY_STANDARD) {}
 
     void init() {
@@ -136,13 +137,39 @@ class gciDPS310 {
   public:
     // static const uint8_t id = uint8_t(Sensors::DPS310);
 
-    gciDPS310() : bsize(pressfloats * sizeof(float)), found(false) {}
+    gciDPS310() : bsize(pressfloats * sizeof(float)), 
+          found(false),
+          id(0xD1) {}
 
     // Sets up the sensor
     void init() {
         if (dps.begin_I2C()) {
-            dps.configurePressure(DPS310_64HZ, DPS310_64SAMPLES);
-            dps.configureTemperature(DPS310_64HZ, DPS310_64SAMPLES);
+            /* 
+            Confused how i can set a sample rate and oversample
+            independant of each other ... shouldn't they be coupled?
+
+            dps310 datasheet, pg 30
+            os - oversample
+            mt - measurement time [ms]
+            prec - precision [Pa rms]
+                      
+             os     mt  prec      Hz
+            -------------------------------
+            128  206.8  0.2     4.84
+             64  104.4  0.2     9.57
+              8   14.8  0.4    67.57
+              4    8.4  0.5   119.04
+              2    5.2  1.0   192.31          
+            */ 
+            dps.configurePressure(DPS310_128HZ, DPS310_64SAMPLES);
+            dps.configureTemperature(DPS310_128HZ, DPS310_64SAMPLES);
+            dps.setMode(DPS310_CONT_PRESTEMP);
+
+            // wait until we have at least one good measurement
+            while (!dps.temperatureAvailable() || !dps.pressureAvailable()) {
+                delay(10);
+            }
+
             found = true;
         }
 
@@ -172,12 +199,12 @@ class gciDPS310 {
         // https://www.mide.com/air-pressure-at-altitude-calculator
         // const float Tb = 15; // temperature at sea level [C] - doesn't work
         // const float Lb = -0.0098; // lapse rate [C/m] - doesn't work ... pow?
-        const float Tb = 288.15;          // temperature at sea level [K]
-        const float Lb = -0.0065;         // lapse rate [K/m]
-        const float Pb = 101325.0;        // pressure at sea level [Pa]
-        const float R = 8.31446261815324; // universal gas const [Nm/(mol K)]
-        const float M = 0.0289644;        // molar mass of Earth's air [kg/mol]
-        const float g0 = 9.80665;         // gravitational const [m/s^2]
+        const float Tb = 288.15;           // temperature at sea level [K]
+        const float Lb = -0.0065;          // lapse rate [K/m]
+        const float Pb = 101325.0;         // pressure at sea level [Pa]
+        const float R  = 8.31446261815324; // universal gas const [Nm/(mol K)]
+        const float M  = 0.0289644;        // molar mass of Earth's air [kg/mol]
+        const float g0 = 9.80665;          // gravitational const [m/s^2]
 
         return (Tb / Lb) * (std::pow(p / Pb, -R * Lb / (g0 * M)) - 1.0);
     }
@@ -189,6 +216,7 @@ class gciDPS310 {
         float f[pressfloats];
     } data;
     const uint8_t bsize; // length of array
+    const uint8_t id;
 
   protected:
     Adafruit_DPS310 dps; // pressure / temperature

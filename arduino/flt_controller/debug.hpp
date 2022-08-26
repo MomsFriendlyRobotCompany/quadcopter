@@ -1,4 +1,4 @@
-
+#include "imu.hpp"
 
 extern gciLSOXLIS imu;
 extern gciDPS310 press;

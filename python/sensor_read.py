@@ -47,7 +47,7 @@ try:
             continue
 
         msgID, size = s.read(2)
-        if msgID in [0xD0]:
+        if msgID in [0xD0, 0xD1]:
             # print(f"> size {size}, msg {msg}")
 
             payload = s.read(size)
@@ -58,7 +58,7 @@ try:
                 msg = press.unpack(payload)
                 printPressure(msg)
 
-            saveMsg(msgID, msg)
+            # saveMsg(msgID, msg)
 
 except KeyboardInterrupt:
     print("ctrl-c")
