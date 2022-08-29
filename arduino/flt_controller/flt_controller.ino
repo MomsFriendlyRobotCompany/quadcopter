@@ -72,7 +72,8 @@ void setup() {
 uint32_t blink_time = 0;
 bool led_blink = true;
 int motor_val[4] = {1000};
-int incr = 50;
+int incr = 10;
+bool start = true;
 
 void loop() {
     // if (imu.found) {
@@ -89,27 +90,42 @@ void loop() {
     //     pack_n_send(press.id, press.bsize, press.data.b);
     // }
 
+    if (start) {
+      start = false;
+      motor_val[0] = 1050;
+      motors.set(motor_val[0], motor_val[1], motor_val[2], motor_val[3]);
+    }
+
     // serial ascii input
     if (Serial.available() > 0) {
         int inByte = Serial.read();
         
         if (inByte == 'a') { // add
-            int mv = Serial.read();
-            motor_val[0] = motor_limit(mv + incr);
+            // int mv = Serial.read();
+            motor_val[0] = motor_limit(motor_val[0] + incr);
             motors.set(motor_val[0], motor_val[1], motor_val[2], motor_val[3]);
+            Serial.println(motor_val[0]);
         }
         else if (inByte == 'd') { // decrease
-            int mv = Serial.read();
-            motor_val[0] = motor_limit(mv - incr);
+            // int mv = Serial.read();
+            motor_val[0] = motor_limit(motor_val[0] - incr);
             // motor.set(motor_val, motor_val, motor_val, motor_val);
             motors.set(motor_val[0], motor_val[1], motor_val[2], motor_val[3]);
+            Serial.println(motor_val[0]);
         }
         else if (inByte == 's') { // stop
-            motor_val[0] = MOTOR_ZERO_LEVEL;
-            motor_val[1] = MOTOR_ZERO_LEVEL;
-            motor_val[2] = MOTOR_ZERO_LEVEL;
-            motor_val[3] = MOTOR_ZERO_LEVEL;
-            motors.set(motor_val[0], motor_val[1], motor_val[2], motor_val[3]);
+            // motor_val[0] = MOTOR_ZERO_LEVEL;
+            // motor_val[1] = MOTOR_ZERO_LEVEL;
+            // motor_val[2] = MOTOR_ZERO_LEVEL;
+            // motor_val[3] = MOTOR_ZERO_LEVEL;
+            int incr = (motor_val[0]-MOTOR_ZERO_LEVEL) / 5.0;
+            Serial.println(incr);
+            while (motor_val[0] > MOTOR_ZERO_LEVEL){
+              motor_val[0] = motor_limit(motor_val[0] - incr);
+              motors.set(motor_val[0], motor_val[1], motor_val[2], motor_val[3]);
+              Serial.println(motor_val[0]);
+              delay(100);
+            }
         }
         // else if (inByte == 'p') { // pwm
         //     // p,motor,steering
