@@ -1,3 +1,5 @@
+#pragma once
+
 #include "imu.hpp"
 
 extern gciLSOXLIS imu;

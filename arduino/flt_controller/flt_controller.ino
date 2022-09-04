@@ -3,46 +3,16 @@
 #include "imu.hpp"
 #include "motors.hpp"
 #include "packer.hpp"
+#include "blinkled.hpp"
 #include <Wire.h>
 #include <cstdint>
 
 gciLSOXLIS imu;
 gciDPS310 press;
-QuadESC motors;
+QuadESC motors(100);
+BlinkLED blinker(500);
+// Telemetry tel(100);
 
-
-void motor_ramp() {
-    // ramp up to max
-    for (int i=MOTOR_ZERO_LEVEL; i < MOTOR_MAX_LEVEL; i+=100){
-      int val = i;
-      motors.set(val,val,val,val);
-      delay(500);
-    }
-
-    // ramp down to min
-    for (int i=MOTOR_MAX_LEVEL; i > MOTOR_ZERO_LEVEL; i-=100){
-      int val = i;
-      motors.set(val,val,val,val);
-      delay(500);
-    }
-
-    // set to 0
-    int val = MOTOR_ZERO_LEVEL;
-    motors.set(val,val,val,val);
-}
-
-/* Toggle board's LED on/off */
-void led(bool val) {
-    constexpr int LED_PIN = 13;
-    constexpr int wait_time = 500;
-
-    if (val) digitalWrite( LED_PIN, HIGH);
-    else {
-        // delay(wait_time);
-        digitalWrite(LED_PIN, LOW);
-        // delay(wait_time); // don't go too fast
-    }
-}
 
 void setup() {
 
@@ -55,27 +25,24 @@ void setup() {
     Wire.setClock(400000);
 
     // setup sensors
-    imu.init();
-    press.init(); 
+    // imu.init();
+    // press.init(); 
 
     Serial.println("Boot complete:");
-    Serial.println(" " + imu.found ? "+ IMU ready" : "! IMU not found");
-    Serial.println(" " + press.found ? "+ Pressure sensor ready"
-                                     : "! Pressure Sensor not found");
+    // Serial.println(" " + imu.found ? "+ IMU ready" : "! IMU not found");
+    // Serial.println(" " + press.found ? "+ Pressure sensor ready"
+    //                                  : "! Pressure Sensor not found");
 
     motors.init();
-    motors.arm();
-    Serial.println("Motors ready and armed");
+    // motors.arm();
+    Serial.println(" Motors ready");
     
 }
 
-uint32_t blink_time = 0;
-bool led_blink = true;
-int motor_val[4] = {1000};
-int incr = 10;
-bool start = true;
+bool telemetry = false;
 
 void loop() {
+  if (telemetry) {
     // if (imu.found) {
     //     imu.read();
     //     // printMag();
@@ -89,63 +56,37 @@ void loop() {
     //     press.read();
     //     pack_n_send(press.id, press.bsize, press.data.b);
     // }
-
-    if (start) {
-      start = false;
-      motor_val[0] = 1050;
-      motors.set(motor_val[0], motor_val[1], motor_val[2], motor_val[3]);
-    }
+  }
 
     // serial ascii input
     if (Serial.available() > 0) {
         int inByte = Serial.read();
-        
-        if (inByte == 'a') { // add
-            // int mv = Serial.read();
-            motor_val[0] = motor_limit(motor_val[0] + incr);
-            motors.set(motor_val[0], motor_val[1], motor_val[2], motor_val[3]);
-            Serial.println(motor_val[0]);
+
+        if (inByte == '\n' or inByte == '\r'); // get rid of \r and \n from Master
+        else if (inByte == 's') motors.stop();
+        else if (inByte == 'a') motors.arm();
+        else if (inByte == 'w') motors.incr(100);
+        else if (inByte == 'x') motors.incr(-100);
+        else if (inByte == 'p') { // pwm
+            // p,m0,m1,m2,m3
+            // since these are 1B (0-255), multiply by 4 (shift by 2) to get 0 - 1020
+            int a = (unsigned int)(Serial.read()) << 2;
+            int b = (unsigned int)(Serial.read()) << 2;
+            int c = (unsigned int)(Serial.read()) << 2;
+            int d = (unsigned int)(Serial.read()) << 2;
+            motors.set(a,b,c,d);
         }
-        else if (inByte == 'd') { // decrease
-            // int mv = Serial.read();
-            motor_val[0] = motor_limit(motor_val[0] - incr);
-            // motor.set(motor_val, motor_val, motor_val, motor_val);
-            motors.set(motor_val[0], motor_val[1], motor_val[2], motor_val[3]);
-            Serial.println(motor_val[0]);
+        else if (inByte == 'r') motors.ramp();
+        else if (inByte == 't') telemetry = !telemetry;
+        else if (inByte == 'g') Serial.println(">>> Good <<<");
+        else { // send error, unknown command
+          Serial.println("e");
         }
-        else if (inByte == 's') { // stop
-            // motor_val[0] = MOTOR_ZERO_LEVEL;
-            // motor_val[1] = MOTOR_ZERO_LEVEL;
-            // motor_val[2] = MOTOR_ZERO_LEVEL;
-            // motor_val[3] = MOTOR_ZERO_LEVEL;
-            int incr = (motor_val[0]-MOTOR_ZERO_LEVEL) / 5.0;
-            Serial.println(incr);
-            while (motor_val[0] > MOTOR_ZERO_LEVEL){
-              motor_val[0] = motor_limit(motor_val[0] - incr);
-              motors.set(motor_val[0], motor_val[1], motor_val[2], motor_val[3]);
-              Serial.println(motor_val[0]);
-              delay(100);
-            }
-        }
-        // else if (inByte == 'p') { // pwm
-        //     // p,motor,steering
-        //     inByte = Serial.read();
-        //     pos = pwmLimit(inByte);
-        //     inByte = Serial.read();
-        //     steer = pwmLimit(inByte);
-        // }
-        // else if (inByte == 'r') { // reboot
-        //     pos = 90;
-        //     steer = 90;
-        //     reboot();
-        //     delay(1000);
-        // }
     }
 
-    uint32_t now = millis();
-    if (now > blink_time){
-      led(led_blink);
-      led_blink = !led_blink;
-      blink_time = now + 500;
+    blinker.update();
+
+    if (telemetry) {
+      motors.update();
     }
 }

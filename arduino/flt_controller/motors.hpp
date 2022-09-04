@@ -1,4 +1,8 @@
+#pragma once
+
 #include <Servo.h>
+#include "blinkled.hpp"
+#include "packer.hpp"
 
 /**
 BLHeli 15a ESC
@@ -32,61 +36,162 @@ constexpr int MOTOR_ZERO_LEVEL = 1000;
 constexpr int MOTOR_ARM_START  = 1500;
 
 // ----- Motor locations -----
-constexpr int PIN_MOTOR0 = 3;
-// constexpr int PIN_MOTOR1 = 0;
-// constexpr int PIN_MOTOR2 = 0;
-// constexpr int PIN_MOTOR3 = 0;
+constexpr int PIN_MOTOR0 = 0;
+constexpr int PIN_MOTOR1 = 2;
+constexpr int PIN_MOTOR2 = 3;
+constexpr int PIN_MOTOR3 = 4;
 
-class QuadESC {
+
+class QuadESC: public Hertz {
   public:
-    QuadESC() : armed(false) {
-
-    }
+    QuadESC(const uint32_t delaytime): 
+        Hertz(delaytime), 
+        armed(false), 
+        motor0_val(MOTOR_ZERO_LEVEL), motor1_val(MOTOR_ZERO_LEVEL), 
+        motor2_val(MOTOR_ZERO_LEVEL), motor3_val(MOTOR_ZERO_LEVEL) {}
 
     ~QuadESC() {
         if (armed)
             stop();
+
+        motor0.writeMicroseconds(MOTOR_ZERO_LEVEL);
+        motor0.detach();
+        motor1.writeMicroseconds(MOTOR_ZERO_LEVEL);
+        motor1.detach();
+        motor2.writeMicroseconds(MOTOR_ZERO_LEVEL);
+        motor2.detach();
+        motor3.writeMicroseconds(MOTOR_ZERO_LEVEL);
+        motor3.detach();
     }
 
+    // void stop() {
+    //     motor0.writeMicroseconds(MOTOR_ZERO_LEVEL);
+    //     motor1.writeMicroseconds(MOTOR_ZERO_LEVEL);
+    //     motor2.writeMicroseconds(MOTOR_ZERO_LEVEL);
+    //     motor3.writeMicroseconds(MOTOR_ZERO_LEVEL);
+    //     motor0.detach();
+    //     motor1.detach();
+    //     motor2.detach();
+    //     motor3.detach();
+    // }
+
     void stop() {
-        motor0.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        // motor1.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        // motor2.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        // motor3.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        motor0.detach();
-        // motor1.detach();
-        // motor2.detach();
-        // motor3.detach();
+      bool state[4]{true,true,true,true};
+      const float steps = 1.0 / 5.0;
+      const int incrs[4]{
+        int((motor0_val - MOTOR_ZERO_LEVEL) * steps),
+        int((motor1_val - MOTOR_ZERO_LEVEL) * steps),
+        int((motor2_val - MOTOR_ZERO_LEVEL) * steps),
+        int((motor3_val - MOTOR_ZERO_LEVEL) * steps),
+      };
+      int vals[4];
+
+      // int incr = (motor_val - MOTOR_ZERO_LEVEL) / 5.0;
+      // Serial.println(incr);
+      while (true){
+        int *motor_val = nullptr;
+        for (int num = 0; num < 4; ++num) {
+          switch (num) {
+            case 0:
+              motor_val = &motor0_val; break;
+            case 1:
+              motor_val = &motor1_val; break;
+            case 2:
+              motor_val = &motor2_val; break;
+            case 3:
+              motor_val = &motor3_val; break;
+          }
+
+          if (*motor_val > MOTOR_ZERO_LEVEL) {
+            *motor_val = motor_limit(*motor_val - incrs[num]);
+            vals[num] = *motor_val;
+          }
+          else {
+            vals[num] = MOTOR_ZERO_LEVEL;
+            state[num] = false;
+          }
+        }
+        set(vals[0],vals[1],vals[2],vals[3]);
+        // Serial.println(motor_val[0]);
+        delay(100);
+
+        if (state[0] == false && state[1] == false && state[2] == false && state[3] == false) break;
+      }
     }
 
     // move to constructor?
     void init() {
         motor0.attach(PIN_MOTOR0, 1000, 2000);
-        // motor1.attach(PIN_MOTOR1);
-        // motor2.attach(PIN_MOTOR2);
-        // motor3.attach(PIN_MOTOR3);
-        // motor0.writeMicroseconds(MOTOR_ARM_START);
-        // motor1.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        // motor2.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        // motor3.writeMicroseconds(MOTOR_ZERO_LEVEL);
-        // delay(3000);
-        // motor0.writeMicroseconds(0);
-        // Serial.println("init done");
+        motor1.attach(PIN_MOTOR1, 1000, 2000);
+        motor2.attach(PIN_MOTOR2, 1000, 2000);
+        motor3.attach(PIN_MOTOR3, 1000, 2000);
     }
 
+    /* Arms the ESC's and makes them ready for flight */
     void arm() {
       motor0.writeMicroseconds(MOTOR_ARM_START);
+      motor1.writeMicroseconds(MOTOR_ARM_START);
+      motor2.writeMicroseconds(MOTOR_ARM_START);
+      motor3.writeMicroseconds(MOTOR_ARM_START);
+
       delay(2000);
+      
       motor0.writeMicroseconds(MOTOR_ZERO_LEVEL);
+      motor1.writeMicroseconds(MOTOR_ZERO_LEVEL);
+      motor2.writeMicroseconds(MOTOR_ZERO_LEVEL);
+      motor3.writeMicroseconds(MOTOR_ZERO_LEVEL);
+      
       delay(1000);
     }
 
-    void set(int m0, int m1, int m2, int m3) {
-        motor0.writeMicroseconds(m0);
-        // motor1.writeMicroseconds(m1);
-        // motor2.writeMicroseconds(m2);
-        // motor3.writeMicroseconds(m3);
+    /* Set the ESC for each motor to a PWM */
+    void set(const int m0, const int m1, const int m2, const int m3) {
+        motor0.writeMicroseconds(motor_limit(m0));
+        motor1.writeMicroseconds(motor_limit(m1));
+        motor2.writeMicroseconds(motor_limit(m2));
+        motor3.writeMicroseconds(motor_limit(m3));
     }
+
+    void incr(const int delta) {
+        motor0_val += delta;
+        motor1_val += delta;
+        motor2_val += delta;
+        motor3_val += delta;
+        set(motor0_val,motor1_val,motor2_val,motor3_val);
+        // return motor_val;
+    }
+
+  void ramp() {
+      // ramp up to max
+      for (int i=MOTOR_ZERO_LEVEL; i < MOTOR_MAX_LEVEL; i+=100){
+        int val = i;
+        this->set(val,val,val,val);
+        delay(500);
+      }
+
+      // ramp down to min
+      for (int i=MOTOR_MAX_LEVEL; i > MOTOR_ZERO_LEVEL; i-=100){
+        int val = i;
+        this->set(val,val,val,val);
+        delay(500);
+      }
+
+      // set to 0
+      int val = MOTOR_ZERO_LEVEL;
+      this->set(val,val,val,val);
+  }
+
+  void update(){
+    if (check()) {
+      packetMotor(
+        motor0_val,
+        motor1_val,
+        motor2_val,
+        motor3_val,
+        (armed) ? 1 : 0
+      );
+    }
+  }
 
   protected:
     Servo motor0;
@@ -94,7 +199,17 @@ class QuadESC {
     Servo motor2;
     Servo motor3;
 
+    int motor0_val;
+    int motor1_val;
+    int motor2_val;
+    int motor3_val;
+
     bool armed;
+
+    inline int motor_limit(const int val){
+        // return val >= MOTOR_MAX_LEVEL ? MOTOR_MAX_LEVEL : val <= MOTOR_ZERO_LEVEL ? MOTOR_ZERO_LEVEL : val;
+        return constrain(val, MOTOR_ZERO_LEVEL, MOTOR_MAX_LEVEL);
+    }
 };
 
 // void motor_ramp() {
@@ -117,6 +232,6 @@ class QuadESC {
 //     motors.set(val,val,val,val);
 // }
 
-int motor_limit(const int val){
-    return val >= MOTOR_MAX_LEVEL ? MOTOR_MAX_LEVEL : val <= MOTOR_ZERO_LEVEL ? MOTOR_ZERO_LEVEL : val;
-}
+// int motor_limit(const int val){
+//     return val >= MOTOR_MAX_LEVEL ? MOTOR_MAX_LEVEL : val <= MOTOR_ZERO_LEVEL ? MOTOR_ZERO_LEVEL : val;
+// }
