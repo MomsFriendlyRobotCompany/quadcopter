@@ -142,6 +142,8 @@ class QuadESC: public Hertz {
       motor3.writeMicroseconds(MOTOR_ZERO_LEVEL);
       
       delay(1000);
+
+      this->armed = true;
     }
 
     /* Set the ESC for each motor to a PWM */
@@ -153,7 +155,7 @@ class QuadESC: public Hertz {
     }
 
     void incr(const int delta) {
-        motor0_val += delta;
+        motor0_val = motor_limit(motor0_val + delta);
         motor1_val += delta;
         motor2_val += delta;
         motor3_val += delta;
