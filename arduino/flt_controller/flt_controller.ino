@@ -6,12 +6,14 @@
 #include "blinkled.hpp"
 #include <Wire.h>
 #include <cstdint>
+#include <yivo.hpp>
 
 gciLSOXLIS imu;
 gciDPS310 press;
-QuadESC motors(100);
+QuadESC motors(1000);
 BlinkLED blinker(500);
-// Telemetry tel(100);
+Yivo yivo;
+Hertz hertz(5);
 
 
 void setup() {
@@ -33,7 +35,7 @@ void setup() {
     // Serial.println(" " + press.found ? "+ Pressure sensor ready"
     //                                  : "! Pressure Sensor not found");
 
-    motors.init();
+    // motors.init();
     // motors.arm();
     Serial.println(" Motors ready");
     
@@ -41,52 +43,63 @@ void setup() {
 
 bool telemetry = false;
 
-void loop() {
-  if (telemetry) {
-    // if (imu.found) {
-    //     imu.read();
-    //     // printMag();
-    //     // printGyro();
-    //     // printAccel();
-    //     // printQuaternion();
-    //     pack_n_send(imu.id, imu.bsize, imu.data.b);
-    // }
+void sendTelemetry () {
+  if (hertz.check()) {
+    if (imu.found) {
+        imu.read();
+        // printMag();
+        // printGyro();
+        // printAccel();
+        // printQuaternion();
+        yivo.pack_n_send(imu.id, imu.data.b,imu.bsize);
+    }
 
-    // if (press.found) {
-    //     press.read();
-    //     pack_n_send(press.id, press.bsize, press.data.b);
-    // }
+    if (press.found) {
+        press.read();
+        yivo.pack_n_send(press.id, press.data.b,press.bsize);
+    }
   }
+
+  if (motors.check()) {
+    Motors4_t m = motors.get_msg();
+    yivo.pack_n_send(MOTORS, reinterpret_cast<uint8_t*>(&m), 10);
+  }
+}
+
+void loop() {
+  if (telemetry) sendTelemetry();
 
     // serial ascii input
     if (Serial.available() > 0) {
         int inByte = Serial.read();
 
         if (inByte == '\n' or inByte == '\r'); // get rid of \r and \n from Master
-        else if (inByte == 's') motors.stop();
         else if (inByte == 'a') motors.arm();
-        else if (inByte == 'w') motors.incr(100);
-        else if (inByte == 'x') motors.incr(-100);
-        else if (inByte == 'p') { // pwm
+        else if (inByte == 'g') yivo.pack_n_send(PING, nullptr, 0);
+        else if (inByte == 'm') {
+          Motors4_t m = motors.get_msg();
+          yivo.pack_n_send(MOTORS, reinterpret_cast<uint8_t*>(&m), 10);
+        }
+        else if (inByte == 'p') { // pwm motor command
             // p,m0,m1,m2,m3
-            // since these are 1B (0-255), multiply by 4 (shift by 2) to get 0 - 1020
-            int a = (unsigned int)(Serial.read()) << 2;
-            int b = (unsigned int)(Serial.read()) << 2;
-            int c = (unsigned int)(Serial.read()) << 2;
-            int d = (unsigned int)(Serial.read()) << 2;
-            motors.set(a,b,c,d);
+            int m[4];
+            for (int i=0; i < 4; i++) {
+              uint8_t a = Serial.read(); // low byte
+              uint8_t b = Serial.read(); // high byte
+              m[i] = (b << 8) + a; 
+            }
+            motors.set(m[0],m[1],m[2],m[3]);
         }
-        else if (inByte == 'r') motors.ramp();
+        else if (inByte == 'r') motors.ramp(); // remove ?
+        else if (inByte == 's') motors.stop();
         else if (inByte == 't') telemetry = !telemetry;
-        else if (inByte == 'g') Serial.println(">>> Good <<<");
-        else { // send error, unknown command
-          Serial.println("e");
-        }
+        else if (inByte == 'T') sendTelemetry();
+        else yivo.pack_n_send(YIVO_ERROR); // send error, unknown command
     }
 
     blinker.update();
 
-    if (telemetry) {
-      motors.update();
-    }
+    // if (telemetry) {
+    //   // motors.update();
+    // }
 }

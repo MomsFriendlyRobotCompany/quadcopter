@@ -7,6 +7,7 @@
 #include <cmath>
 #include <squaternion.hpp>
 #include <stdint.h>
+#include <yivo.hpp>
 
 /*
 Define IMU message size
@@ -34,7 +35,7 @@ class gciLSOXLIS {
     gciLSOXLIS()
         : found(false), soxFound(false), magFound(false),
           bsize(numfloats * sizeof(float)), 
-          id(0xD0),
+          id(IMU_AGMQT),
           invg(1.0 / SENSORS_GRAVITY_STANDARD) {}
 
     void init() {
@@ -57,8 +58,7 @@ class gciLSOXLIS {
             // does this lis3mdl.setPerformanceMode(LIS3MDL_HIGHMODE); // 300
             // already does this
             lis3mdl.setOperationMode(LIS3MDL_CONTINUOUSMODE);
-            lis3mdl.setDataRate(
-                LIS3MDL_DATARATE_300_HZ); // sets LIS3MDL_HIGHMODE
+            lis3mdl.setDataRate(LIS3MDL_DATARATE_300_HZ); // sets LIS3MDL_HIGHMODE
             lis3mdl.setRange(LIS3MDL_RANGE_4_GAUSS);
         }
 
@@ -105,12 +105,13 @@ class gciLSOXLIS {
 
     bool found;
 
-    union {
-        byte b[numfloats * sizeof(float)];
-        float f[numfloats];
-        uint32_t l[numfloats];
-    } data;
-    const uint8_t bsize; // length of array
+    // union {
+    //     byte b[numfloats * sizeof(float)];
+    //     float f[numfloats];
+    //     uint32_t l[numfloats];
+    // } data;
+    Buffer<numfloats> data;
+    const uint16_t bsize; // length of array
     const uint8_t id;
 
   protected:
@@ -139,7 +140,7 @@ class gciDPS310 {
 
     gciDPS310() : bsize(pressfloats * sizeof(float)), 
           found(false),
-          id(0xD1) {}
+          id(PRES_TEMP) {}
 
     // Sets up the sensor
     void init() {
@@ -211,11 +212,12 @@ class gciDPS310 {
 
     bool found;
 
-    union {
-        byte b[pressfloats * sizeof(float)];
-        float f[pressfloats];
-    } data;
-    const uint8_t bsize; // length of array
+    // union {
+    //     byte b[pressfloats * sizeof(float)];
+    //     float f[pressfloats];
+    // } data;
+    Buffer<pressfloats> data;
+    const uint16_t bsize; // length of array
     const uint8_t id;
 
   protected:

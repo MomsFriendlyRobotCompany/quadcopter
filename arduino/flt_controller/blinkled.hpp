@@ -3,38 +3,29 @@
 
 class Hertz {
   public:
-  Hertz(const uint32_t delaytime): blink_time(millis()), dt(delaytime) {}
+  Hertz(const uint32_t delaytime): mark(millis()), dt(delaytime) {}
 
-  protected:
   bool check(){
     uint32_t now = millis();
-    if (now > blink_time){
-      // led(led_blink);
-      // led_blink = !led_blink;
-      blink_time = now + dt;
+    if (now > mark){
+      mark = now + dt;
       return true;
     }
     return false;
   }
 
+  protected:
   const uint32_t dt;
-  uint32_t blink_time;
+  uint32_t mark;
 };
 
 
 /* Toggle board's LED on/off */
 class BlinkLED: public Hertz {
   public:
-  // BlinkLED(const uint32_t delaytime): blink_time(millis()), led_blink(true), dt(delaytime) {}
   BlinkLED(const uint32_t delaytime): led_blink(true), Hertz(delaytime) {}
 
   void update() {
-    // uint32_t now = millis();
-    // if (now > blink_time){
-    //   led(led_blink);
-    //   led_blink = !led_blink;
-    //   blink_time = now + dt;
-    // }
     if (check()) {
       led(led_blink);
       led_blink = !led_blink;
@@ -51,19 +42,5 @@ class BlinkLED: public Hertz {
       else digitalWrite(LED_PIN, LOW);
   }
 
-  // const uint32_t dt;
-  // uint32_t blink_time;
   bool led_blink;
 };
-
-
-// class Telemetry: public Hertz {
-//   public:
-//   Telemetry(const uint32_t delaytime): Hertz(delaytime) {}
-
-//   void update(int a, int b, int c, int d) {
-//     if (check()){
-//       packetMotor(a,b,c,d);
-//     }
-//   }
-// };

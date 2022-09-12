@@ -3,6 +3,7 @@
 #include <Servo.h>
 #include "blinkled.hpp"
 #include "packer.hpp"
+#include <yivo.hpp>
 
 /**
 BLHeli 15a ESC
@@ -45,10 +46,15 @@ constexpr int PIN_MOTOR3 = 4;
 class QuadESC: public Hertz {
   public:
     QuadESC(const uint32_t delaytime): 
-        Hertz(delaytime), 
-        armed(false), 
-        motor0_val(MOTOR_ZERO_LEVEL), motor1_val(MOTOR_ZERO_LEVEL), 
-        motor2_val(MOTOR_ZERO_LEVEL), motor3_val(MOTOR_ZERO_LEVEL) {}
+            Hertz(delaytime), 
+            armed(false), 
+            motor0_val(MOTOR_ZERO_LEVEL), motor1_val(MOTOR_ZERO_LEVEL), 
+            motor2_val(MOTOR_ZERO_LEVEL), motor3_val(MOTOR_ZERO_LEVEL) {
+        motor0.attach(PIN_MOTOR0, 1000, 2000);
+        motor1.attach(PIN_MOTOR1, 1000, 2000);
+        motor2.attach(PIN_MOTOR2, 1000, 2000);
+        motor3.attach(PIN_MOTOR3, 1000, 2000);
+    }
 
     ~QuadESC() {
         if (armed)
@@ -120,12 +126,12 @@ class QuadESC: public Hertz {
     }
 
     // move to constructor?
-    void init() {
-        motor0.attach(PIN_MOTOR0, 1000, 2000);
-        motor1.attach(PIN_MOTOR1, 1000, 2000);
-        motor2.attach(PIN_MOTOR2, 1000, 2000);
-        motor3.attach(PIN_MOTOR3, 1000, 2000);
-    }
+    // void init() {
+    //     // motor0.attach(PIN_MOTOR0, 1000, 2000);
+    //     // motor1.attach(PIN_MOTOR1, 1000, 2000);
+    //     // motor2.attach(PIN_MOTOR2, 1000, 2000);
+    //     // motor3.attach(PIN_MOTOR3, 1000, 2000);
+    // }
 
     /* Arms the ESC's and makes them ready for flight */
     void arm() {
@@ -155,7 +161,7 @@ class QuadESC: public Hertz {
     }
 
     void incr(const int delta) {
-        motor0_val = motor_limit(motor0_val + delta);
+        motor0_val += delta;
         motor1_val += delta;
         motor2_val += delta;
         motor3_val += delta;
@@ -183,16 +189,31 @@ class QuadESC: public Hertz {
       this->set(val,val,val,val);
   }
 
-  void update(){
-    if (check()) {
-      packetMotor(
-        motor0_val,
-        motor1_val,
-        motor2_val,
-        motor3_val,
-        (armed) ? 1 : 0
-      );
-    }
+  // void update(){
+  //   if (check()) {
+  //     packetMotor(
+  //       motor0_val,
+  //       motor1_val,
+  //       motor2_val,
+  //       motor3_val,
+  //       (armed) ? 1 : 0
+  //     );
+  //   }
+  // }
+
+  Motors4_t get_msg() {
+    Motors4_t m;
+    m.m0 = motor0_val;
+    m.m1 = motor1_val;
+    m.m2 = motor2_val;
+    m.m3 = motor3_val;
+    m.armed = (armed) ? 1 : 0;
+    // uint16_t msg[5]{
+    //   m0,m1,m2,m3,
+    //   (armed) ? 1 : 0
+    // };
+
+    return m;
   }
 
   protected:
@@ -213,27 +234,3 @@ class QuadESC: public Hertz {
         return constrain(val, MOTOR_ZERO_LEVEL, MOTOR_MAX_LEVEL);
     }
 };
-
-// void motor_ramp() {
-//     // ramp up to max
-//     for (int i=MOTOR_ZERO_LEVEL; i < MOTOR_MAX_LEVEL; i+=100){
-//       int val = i;
-//       motors.set(val,val,val,val);
-//       delay(500);
-//     }
-
-//     // ramp down to min
-//     for (int i=MOTOR_MAX_LEVEL; i > MOTOR_ZERO_LEVEL; i-=100){
-//       int val = i;
-//       motors.set(val,val,val,val);
-//       delay(500);
-//     }
-
-//     // set to 0
-//     int val = MOTOR_ZERO_LEVEL;
-//     motors.set(val,val,val,val);
-// }
-
-// int motor_limit(const int val){
-//     return val >= MOTOR_MAX_LEVEL ? MOTOR_MAX_LEVEL : val <= MOTOR_ZERO_LEVEL ? MOTOR_ZERO_LEVEL : val;
-// }
