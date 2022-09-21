@@ -3,6 +3,7 @@ from serial import Serial
 from telemetry import Telemetry
 import time
 from yivo import Yivo
+from yivo.packet import Motors4
 import sys, select
 
 # --------------------
@@ -20,7 +21,7 @@ def limit(a,vmin=1000, vmax=2000):
 def main():
     ser = Serial()
     ser.port = "/dev/tty.usbmodem14601"
-    ser.baud = 115200
+    ser.baud = 1
     ser.timeout = 0.1
     ser.open()
 
@@ -57,11 +58,12 @@ def main():
                 elif c[0] == 'p': # PWM command for m0, m1, m2, m3
                     cmd = c.split()
                     if len(cmd) == 5:
-                        m = b''
+                        m = b'p'
                         for i in range(4):
                             pwm[i] = limit(int(cmd[i+1]))
                             m += pwm[i].to_bytes(2,'little')
-                        m = b'p' + m
+                        # m = b'p' + m
+                        print(m)
                         ser.write(m)
                         c = m
                     else:
@@ -80,6 +82,8 @@ def main():
                 elif c == 't': # telemetry toggle
                     ser.write(b't')
                     c = "toggle telemetry"
+                elif c == 'T': # telemetry toggle
+                    ser.write(b'T')
                 elif c == 'w': # increase motor speed
                     incr = 10
                     m = b''
@@ -98,15 +102,24 @@ def main():
                     m = b'p' + m
                     ser.write(m)
                     c = m
+                else:
+                    print("*** Unknown input ***")
 
-                print(">>", c)
+                # print(">>", c)
+                # msg = yivo.read_packet(ser)
+                # print(f">> {msg}")
 
             else:
             #     # print(".", end="", flush=True)
             #     pass
-                if ser.in_waiting:
-                    c = ser.read(32)
-                    print(c)
+                while ser.in_waiting:
+                    # c = ser.read(32)
+                    # print(c)
+                    msg = yivo.read_packet(ser)
+                    # if isinstance(msg, Motors4):
+                    print(f">> {msg}")
+                # else:
+                #     print("-- no data")
 
             # time.sleep(0.05)
 
