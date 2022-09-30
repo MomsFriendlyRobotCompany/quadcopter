@@ -1,9 +1,7 @@
 
-// #include "debug.hpp"
 #include "imu.hpp"
 #include "pres_temp.hpp"
 #include "motors.hpp"
-// #include "packer.hpp"
 #include "blinkled.hpp"
 #include <Wire.h>
 #include <cstdint>
@@ -30,15 +28,10 @@ void setup() {
 
     // setup sensors
     imu.init();
-    // press.init(); 
 
     Serial.println("Boot complete:");
     Serial.println(" " + imu.found ? "+ IMU ready" : "! IMU not found");
-    // Serial.println(" " + press.found ? "+ Pressure sensor ready"
-    //                                  : "! Pressure Sensor not found");
 
-    // motors.init();
-    // motors.arm();
     Serial.println(" Motors ready");
     
 }
@@ -50,18 +43,9 @@ void sendTelemetry (bool now=false) {
   if (hertz.check() || now) {
     if (imu.found) {
         imu.read();
-        if (telemetry) yivo.pack_n_send(imu.id, imu.data.b,imu.bsize);
+        if (telemetry || now) yivo.pack_n_send(imu.id, imu.data.b,imu.bsize);
     }
-    else Serial.println("no imu");
-
-    // if (press.found) {
-    //     gci::pt_t s = press.read();
-    //     dbuff.clear();
-    //     dbuff.f[0] = s.press;
-    //     dbuff.f[1] = s.temp;
-    //     if (s.ok && telemetry) yivo.pack_n_send(PRES_TEMP, dbuff.b, 8);
-    // }
-    // else Serial.println("no press");
+    // else Serial.println("no imu");
   }
 
   if (motors.check()) {
@@ -71,9 +55,6 @@ void sendTelemetry (bool now=false) {
 }
 
 void loop() {
-  // if (imu.found) imu.read(); // need to keep this updating
-  
-  // if (telemetry) sendTelemetry();
   sendTelemetry();
 
     // serial ascii input

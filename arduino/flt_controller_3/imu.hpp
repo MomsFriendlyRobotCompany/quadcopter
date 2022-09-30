@@ -115,8 +115,14 @@ class gciLSOXLISBMP: public mSensor<imuNumFloats> {
 
         if (pressFound) {
           gci::pt_t s = bmp.read();
-          data.f[14] = s.press;
-          data.f[15] = s.temp;
+          if (s.ok) {
+            data.f[14] = s.press;
+            data.f[15] = s.temp;
+          }
+          else {
+            data.f[14] = 0.0f;
+            data.f[15] = 0.0f;
+          }
         }
     }
 

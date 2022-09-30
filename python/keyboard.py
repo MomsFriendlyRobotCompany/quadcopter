@@ -117,7 +117,8 @@ def main():
                     # print(c)
                     msg = yivo.read_packet(ser)
                     # if isinstance(msg, Motors4):
-                    print(f">> {msg}")
+                    if msg:
+                        print(f">> {msg}")
                 # else:
                 #     print("-- no data")
 
