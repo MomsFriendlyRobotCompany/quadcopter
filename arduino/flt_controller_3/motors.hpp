@@ -1,10 +1,13 @@
 #pragma once
 
 #include <Servo.h>
-#include "blinkled.hpp"
+#include <gciSensors.hpp>
+// #include "blinkled.hpp"
 // #include "packer.hpp"
 #include <messages.hpp>
-
+// #include "Adafruit_ItsyBitsy_M0.hpp"
+#include "board.h"
+// 
 /**
 BLHeli 15a ESC
 Features from pdf manual
@@ -37,16 +40,16 @@ constexpr int MOTOR_ZERO_LEVEL = 1000;
 constexpr int MOTOR_ARM_START  = 1500;
 
 // ----- Motor locations -----
-constexpr int PIN_MOTOR0 = 7;
-constexpr int PIN_MOTOR1 = 9;
-constexpr int PIN_MOTOR2 = 10;
-constexpr int PIN_MOTOR3 = 11;
+// constexpr int PIN_MOTOR0 = 7;
+// constexpr int PIN_MOTOR1 = 9;
+// constexpr int PIN_MOTOR2 = 10;
+// constexpr int PIN_MOTOR3 = 11;
 
 
-class QuadESC: public Hertz {
+class QuadESC: public Alarm {
   public:
     QuadESC(const uint32_t delaytime): 
-            Hertz(delaytime), 
+            Alarm(delaytime), 
             armed(false), 
             motor0_val(MOTOR_ZERO_LEVEL), motor1_val(MOTOR_ZERO_LEVEL), 
             motor2_val(MOTOR_ZERO_LEVEL), motor3_val(MOTOR_ZERO_LEVEL) {

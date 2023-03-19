@@ -1,29 +1,17 @@
 #pragma once
 
+#include <gciSensors.hpp>
+#include "board.h"
+// #include "Adafruit_ItsyBitsy_M0.hpp"
 
-class Hertz {
+
+// constexpr int BOARD_LED_PIN = 13;
+constexpr int wait_time = 500;
+
+// Toggle board's LED on/off
+class BlinkLED: public Alarm {
   public:
-  Hertz(const uint32_t delaytime): mark(millis()), dt(delaytime) {}
-
-  bool check(){
-    uint32_t now = millis();
-    if (now > mark){
-      mark = now + dt;
-      return true;
-    }
-    return false;
-  }
-
-  protected:
-  const uint32_t dt;
-  uint32_t mark;
-};
-
-
-/* Toggle board's LED on/off */
-class BlinkLED: public Hertz {
-  public:
-  BlinkLED(const uint32_t delaytime): led_blink(true), Hertz(delaytime) {}
+  BlinkLED(const uint32_t delaytime): led_blink(true), Alarm(delaytime) {}
 
   void update() {
     if (check()) {
@@ -35,12 +23,30 @@ class BlinkLED: public Hertz {
   protected:
 
   void led(bool val) {
-      constexpr int LED_PIN = 13;
-      constexpr int wait_time = 500;
-
-      if (val) digitalWrite(LED_PIN, HIGH);
-      else digitalWrite(LED_PIN, LOW);
+      if (val) digitalWrite(BOARD_LED_PIN, HIGH);
+      else digitalWrite(BOARD_LED_PIN, LOW);
   }
 
   bool led_blink;
 };
+
+
+//////////////////////////////////////////
+
+// class Hertz {
+//   public:
+//   Hertz(const uint32_t delaytime): mark(millis()), dt(delaytime) {}
+
+//   bool check(){
+//     uint32_t now = millis();
+//     if (now > mark){
+//       mark = now + dt;
+//       return true;
+//     }
+//     return false;
+//   }
+
+//   protected:
+//   const uint32_t dt;
+//   uint32_t mark;
+// };

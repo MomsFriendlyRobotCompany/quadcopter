@@ -2,6 +2,14 @@
 
 Just starting to think about this ...
 
+## Resources
+
+- BSD: [PX4 Autopilot](https://github.com/PX4/PX4-Autopilot)
+- BSD: [PX4 Estimation and Control Library (ECL)](https://github.com/PX4/PX4-ECL)
+- BSD: [PX4 Matrix](https://github.com/PX4/PX4-Autopilot/tree/4a3d64f1d76856d22323d1061ac6e560efda0a05/src/lib/matrix)
+- BSD: [InertialNav](https://github.com/priseborough/InertialNav)
+- GPL: [Ardupilot](https://github.com/ArduPilot/ardupilot)
+
 # MIT License
 
 **Copyright (c) 2019 Mom's Friendly Robot Company**

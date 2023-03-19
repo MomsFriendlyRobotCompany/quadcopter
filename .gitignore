@@ -3,4 +3,10 @@
 *.pyc
 build
 .ipynb_checkpoints
+*.mp4
+kitti/
+other-vo/
+*.heic
+video_odometry/jupyter/arducam/*.pkl
 *.pkl
+
