@@ -85,10 +85,11 @@ def printHUD(stdscr):
     stdscr.hline(row, 0,"-",line_width); row+=1
     stdscr.addstr(row,0,f"Run Time"); row+=1
     # dy = imu.ts//(24*360000)
-    hr = imu.ts//360000
-    mn = (imu.ts-hr*360000)//60000
-    sec = imu.ts-hr*360000-mn*60000
-    stdscr.addstr(row,0,f"  timestamp: {imu.ts*0.001:.3f} sec    Up Time: {hr}:{mn:02d}:{sec*0.001:06.3f}"); row+=1
+    ts = imu.ts * 25e-6
+    hr = int(ts//3600)
+    mn = int(ts-hr*3600)//60
+    sec = ts-hr*3600-mn*60
+    stdscr.addstr(row,0,f"  timestamp: {ts:.3f} sec    Up Time: {hr:02d}:{mn:02d}:{sec:06.3f}"); row+=1
 
     stdscr.hline(row, 0,"-",line_width); row+=1
 

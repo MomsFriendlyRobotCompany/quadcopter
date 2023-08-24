@@ -1,1 +1,0 @@
-../yivo_parser.py

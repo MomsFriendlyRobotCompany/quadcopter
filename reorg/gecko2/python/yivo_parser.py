@@ -1,9 +1,9 @@
 
 from enum import IntEnum
 
-def printp(s):
-    if 0:
-        print(s)
+# def printp(s):
+#     if 0:
+#         print(s)
 
 
 ReadState_t = IntEnum("ReadState_t", [

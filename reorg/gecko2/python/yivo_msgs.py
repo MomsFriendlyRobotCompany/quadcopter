@@ -1,25 +1,32 @@
 from collections import namedtuple
 from struct import Struct
 from enum import IntEnum
+from enum import unique
+from yivo import make_Struct
 
 # MSG_DISTANCE    = 20
 # MSG_MOTORS_4    = 30
 # MSG_IMU_FULL    = 42
 
+@unique
 class MSG(IntEnum):
     DISTANCE    = 20
     MOTORS_4    = 30
     IMU_FULL    = 42
+    TWIST = 50
 
 # IMU = namedtuple("IMU","id ts ax ay az gx gy gz mx my mz qw qx qy qz p t")
 IMU = namedtuple("IMU","id ts ax ay az gx gy gz mx my mz qw qx qy qz altitude lidar")
 Range = namedtuple("Range", "id ts min max distance type")
 Motor4 = namedtuple("Motor4", "m0 m1 m2 m3 armed")
+vec_t = namedtuple("vec_t", "x y z")
+twist_t = namedtuple("twist_t", "linear angular")
 
 msgdb = {
-    MSG.DISTANCE: (Struct("<BQ3HB"), Range, 16),
-    MSG.MOTORS_4: (Struct("<4HB"), Motor4, 9),
-    MSG.IMU_FULL: (Struct("<BQ15f"), IMU, 69),
+    # MSG.DISTANCE: (Struct("<BQ3HB"), Range),
+    # MSG.MOTORS_4: (Struct("<4HB"), Motor4),
+    MSG.IMU_FULL: (Struct("<BQ15f"), IMU),
+    MSG.TWIST:    (make_Struct("<6f"), twist_t)
 }
 
 
@@ -42,7 +49,8 @@ def unpack(payload, id):
     # elif id == 30 and len(payload) == 5:
     # return None
     try:
-        fmt, msg, size = msgdb[id]
+        fmt, msg, _ = msgdb[id]
+        size = fmt.size
         if len(payload) != size:
             # print(id, ": ", len(payload), " != ", size)
             return None

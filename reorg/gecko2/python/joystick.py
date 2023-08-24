@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 from serial import Serial
-from telemetry import Telemetry
+# from telemetry import Telemetry
 from clamps import PS4Joystick
+from yivo import Yivo
+from yivo_msgs import IMU, Range, MSG, vec_t, twist_t
+from yivo_msgs import unpack
+from yivo_parser import YivoParser
 import time
+import sys
 
 
 ###############################################################
@@ -18,6 +23,8 @@ class JSUpdater(PS4Joystick):
         self.dt = 0.1
 
     def check(self):
+        if not self.valid:
+            return False
         now = time.monotonic()
         if now >= self.time:
             self.time = now + self.dt
@@ -34,38 +41,44 @@ class JSUpdater(PS4Joystick):
             ret = True
         return ret
 
-def main():
+def main(port):
     s = Serial()
-    s.port = "/dev/tty.usbmodem14601"
-    s.baud = 115200
+    s.port = port
+    s.baud = 1000000
     s.timeout = 1
     s.open()
     # s.write(b"t\n")
     # s.write(b"g\n")
 
-    tel = Telemetry()
+    # tel = Telemetry()
     js = JSUpdater()
+
+    yivo = Yivo()
 
     # js = PS4Joystick()
     if not js.valid:
         print("*** No joystick found ***")
+        sys.exit(1)
 
     try:
         while True:
-            if s.in_waiting > 0:
-                msgID, d = tel.get(s)
+            # if s.in_waiting > 0:
+            #     msgID, d = tel.get(s)
 
-            if js.valid and js.check():
+            if js.check():
                 ps4 = js.get(raw=True)
 
-                if ps4.buttons.square is True:
-                    s.write(b"t\n")
-                elif ps4.buttons.circle is True:
-                    s.write(b"g\n")
-                elif ps4.buttons.x is True:
-                    s.write(b"a\n")
-                elif ps4.buttons.share is True:
-                    tel.save_data = not tel.save_data
+                if ps4.buttons.share is True:
+                    break
+
+                # if ps4.buttons.square is True:
+                #     s.write(b"t\n")
+                # elif ps4.buttons.circle is True:
+                #     s.write(b"g\n")
+                # elif ps4.buttons.x is True:
+                #     s.write(b"a\n")
+                # elif ps4.buttons.share is True:
+                #     tel.save_data = not tel.save_data
 
                 x,y = ps4.leftstick
                 x = x >> 7
@@ -75,9 +88,12 @@ def main():
                     delta = 1
                     x = int(delta*js.lx) >> 2
                     y = int(delta*js.ly) >> 2
-                    print(f"left x: {x << 2}   y: {y << 2}")
-                    if y > 0: s.write(b"w\n")
-                    elif y < 0: s.write(b"x\n")
+                    # print(f"left x: {x << 2}   y: {y << 2}")
+                    # if y > 0: s.write(b"w\n")
+                    # elif y < 0: s.write(b"x\n")
+                    cmd = twist_t(vec_t(1,2,3), vec_t(1,2,3))
+                    msg = yivo.pack(50, cmd)
+                    print(msg)
 
             time.sleep(0.05)
 
@@ -85,10 +101,14 @@ def main():
         print("ctrl-c")
 
     finally:
-        s.close()
+        # s.close()
         js.close()
-        tel.save()
+        # tel.save()
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: joystick.py <serial_port>")
+        sys.exit(1)
+
+    main(sys.argv[1])
