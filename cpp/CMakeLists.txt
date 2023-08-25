@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25.0)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -25,112 +25,71 @@ if(PROJECT_IS_TOP_LEVEL)
     message(STATUS " ${PROC}")
     message(STATUS "-------------------------------------")
 
-    # set(BUILD_EXAMPLES ON)
-    # set(BUILD_GTESTS ON)
-# else()
-    # message(STATUS "-> ${PROJECT_NAME} is submodule")
-    # set(BUILD_EXAMPLES OFF)
-    # set(BUILD_GTESTS OFF)
 endif()
-
-# file(SIZE libgecko2.a LIBSIZE)
-# message(">> Size ${LIBSIZE}")
 
 # Threads -----------------
-find_package(Threads REQUIRED)
-if(Threads_FOUND)
-    message(STATUS ">> Threads found")
-    if(CMAKE_USE_PTHREADS_INIT)
-        message(STATUS " -> Using pthreads")
-    endif()
-else()
-    message(WARNING "*** Could not find Threads ***")
-endif()
+# find_package(Threads REQUIRED)
+# if(Threads_FOUND)
+#     message(STATUS ">> Threads found")
+#     if(CMAKE_USE_PTHREADS_INIT)
+#         message(STATUS " -> Using pthreads")
+#     endif()
+# else()
+#     message(WARNING "*** Could not find Threads ***")
+# endif()
 
 include(FetchContent)
 
 # gecko2 -----------------
-FetchContent_Declare(marko
-    GIT_REPOSITORY "https://github.com/gecko-robotics/marko.cpp.git"
+FetchContent_Declare(gecko2
+    GIT_REPOSITORY "https://github.com/gecko-robotics/gecko2.git"
     GIT_TAG "origin/main"
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/marko"
+    SOURCE_SUBDIR "cpp"
 )
 
 # serialcomm -----------------
 FetchContent_Declare(serialcomm
     GIT_REPOSITORY "https://github.com/gecko-robotics/serialcomm.git"
     GIT_TAG "origin/main"
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/serialcomm"
 )
 
 # yivo -----------------
 FetchContent_Declare(yivo
-    GIT_REPOSITORY "git@github.com:MomsFriendlyRobotCompany/yivo.cpp.git"
+    GIT_REPOSITORY "https://github.com/MomsFriendlyRobotCompany/yivo.git"
     GIT_TAG "origin/main"
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/yivo"
+    SOURCE_SUBDIR "c++"
 )
 
 # squaternion -----------------
 FetchContent_Declare(squaternion
-    GIT_REPOSITORY "git@github.com:MomsFriendlyRobotCompany/squaternion.cpp.git"
-    GIT_TAG "origin/main"
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/squaternion"
-)
-
-# marko -----------------
-FetchContent_Declare(marko
-    GIT_REPOSITORY "https://github.com/gecko-robotics/marko.cpp.git"
-    GIT_TAG "origin/main"
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/marko"
+    GIT_REPOSITORY "https://github.com/MomsFriendlyRobotCompany/squaternion.git"
+    GIT_TAG "origin/master"
+    SOURCE_SUBDIR "cpp"
 )
 
 LIST(APPEND libs
     squaternion
-    # yivo
+    yivo
     # serialcomm
-    # gcimock
-    # marko
+    gecko2
 )
 
 FetchContent_MakeAvailable( ${libs} )
 
-foreach(lib ${libs})
-    if(${lib}_POPULATED)
-        message(STATUS "=> Found ${lib}")
-    else()
-        message(STATUS "*** Didn't find ${lib}")
-    endif()
-endforeach()
+# Executables =====================================================================
 
-
-# Library =====================================================================
-# configure_file(src/gecko2/version.hpp.in src/gecko2/version.hpp)
-
-add_library(${PROJECT_NAME} INTERFACE src)
-target_include_directories(${PROJECT_NAME}
-INTERFACE
-        ${CMAKE_SOURCE_DIR}/src
-        # ${marko_SOURCE_DIR}/include
-        # ${gcimock_SOURCE_DIR}/include
-        # ${yivo_SOURCE_DIR}/src
+LIST(APPEND programs
+    navigator
+    bus
 )
-# target_link_libraries(${PROJECT_NAME}
-# INTERFACE
-#         # marko
-#         # yivo
-#         # Threads::Threads
-# )
 
-message(STATUS "Building ${PROJECT_NAME} examples is ${BUILD_EXAMPLES}")
-if(BUILD_EXAMPLES)
-    add_subdirectory(examples/messages)
-    # add_subdirectory(examples/quad)
-endif()
-
-message(STATUS "Building ${PROJECT_NAME} gtests is ${BUILD_GTESTS}")
-if(BUILD_GTESTS)
-    add_subdirectory(gtests)
-endif()
+foreach(exec ${programs})
+    add_executable(${exec} src/${exec}.cpp)
+    target_link_libraries(${exec}
+        PRIVATE
+            ${libs}
+    )
+endforeach()
 
 # add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 #     COMMAND ${CMAKE_BUILD_DIR}

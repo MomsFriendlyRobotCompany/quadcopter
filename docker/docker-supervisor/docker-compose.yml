@@ -1,0 +1,15 @@
+---
+version: '3'
+services:
+  serv:
+    build: .
+    image: walchko/serv:latest
+
+    command: "/usr/bin/supervisord -c /etc/supervisord.conf"
+    # command: "/usr/bin/supervisord"
+    volumes:
+      - ./logs:/var/log/local
+
+    # ports:
+    # - 5140:514/udp
+    # - 5140:514/tcp

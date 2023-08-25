@@ -10,3 +10,6 @@ other-vo/
 video_odometry/jupyter/arducam/*.pkl
 *.pkl
 
+*.bz2
+*.zip
+*.log

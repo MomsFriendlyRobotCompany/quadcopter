@@ -1,0 +1,18 @@
+---
+version: '3'
+
+services:
+  quad:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: walchko/quad
+    container_name: quad-container
+    hostname: quad
+    ports:
+      - "9000:9000/udp"
+      - "80:80"
+      - "22:22"
+    command: "/usr/bin/supervisord -c /etc/supervisord.conf"
+    volumes:
+      - ./logs:/var/log/local
