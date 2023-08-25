@@ -70,7 +70,7 @@ FetchContent_Declare(squaternion
 LIST(APPEND libs
     squaternion
     yivo
-    # serialcomm
+    serialcomm
     gecko2
 )
 
