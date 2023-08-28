@@ -70,7 +70,7 @@ class Hertz:
 def main():
     msgdb = {
         Msg.SATNAV: (make_Struct("4f2B3B3B"), gps_t),
-        Msg.IMU_AGMPT: (make_Struct("BI11f"), imu_agmtp_t)
+        Msg.IMU_AGMPT: (make_Struct("11fI"), imu_agmtp_t)
     }
 
     yivo = Yivo(msgdb)
@@ -90,20 +90,21 @@ def main():
     ser = Serial(port, 1000000)
 
     try:
-        cnt = 0
         while True:
             c = ser.read(1)
             ok,this_id,msg = yivo.parse(c)
             if ok:
+                print(msg)
                 if this_id == Msg.IMU_AGMPT:
                     imuhz.touch()
-                    imu.append(msg)
+                    imu.append(msg.serialize())
                 elif this_id == Msg.SATNAV:
                     gpshz.touch()
-                    gps.append(msg)
+                    gps.append(msg.serialize())
 
-                    print(f">> IMU: {imuhz.hertz():7.1f} Hz", end="\n")
-                    print(f">> GPS: {gpshz.hertz():7.1f} Hz", end="\r")
+                # print("\x1Bc\n")
+                print(f">> IMU: {imuhz.hertz():7.1f} Hz", end="\n")
+                print(f">> GPS: {gpshz.hertz():7.1f} Hz", end="\r")
 
     except KeyboardInterrupt:
         print("\nctrl-c")
@@ -117,6 +118,7 @@ def main():
             "imu": imu,
             "gps": gps
         }
+        print(f">> IMU: {len(imu)} GPS: {len(gps)} data points")
         col = Collector()
         col.timestamp = True
         fname = cmdline

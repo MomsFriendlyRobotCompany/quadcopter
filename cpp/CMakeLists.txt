@@ -57,7 +57,7 @@ FetchContent_Declare(serialcomm
 FetchContent_Declare(yivo
     GIT_REPOSITORY "https://github.com/MomsFriendlyRobotCompany/yivo.git"
     GIT_TAG "origin/main"
-    SOURCE_SUBDIR "c++"
+    SOURCE_SUBDIR "cpp"
 )
 
 # squaternion -----------------

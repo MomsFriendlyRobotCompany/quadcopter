@@ -74,21 +74,18 @@ void loop() {
     GPS.read();
     now = millis();
   }
-  float dt = (now - ts) * 0.001;
-  ts = now;
-
-  // imu.timestamp = now - epoch;
+  // // float dt = (now - ts) * 0.001;
+  ts = millis();
 
   if (GPS.newNMEAreceived()) {
     gps_t gps;
     GPS.parse(GPS.lastNMEA());
-    gps.fix = GPS.fix;
     if (GPS.fix) {
       gps.lat = GPS.latitudeDegrees; // decimal degrees
       gps.lon = GPS.longitudeDegrees; // decimal degrees
       gps.altitude = GPS.altitude; // meters above MSL
       gps.satellites = GPS.satellites;
-      // gps.speed = GPS.speed * knots2mps; // RMC meters/sec, only do GGA
+      gps.fix = GPS.fix;
       gps.hdop = GPS.HDOP;
 
       gps.date.month = GPS.month;
@@ -119,11 +116,6 @@ void loop() {
 
       Serial.println("------------------------------------");
 #else
-      // yivo.pack(MSG_SATNAV, reinterpret_cast<uint8_t *>(&gps), sizeof(gps_t));
-      // uint8_t *buff = yivo.get_buffer();
-      // uint16_t size = yivo.get_total_size();
-      // Serial.write(buff, size);
-
       YivoPack_t p = yivo.pack(MSG_SATNAV, reinterpret_cast<uint8_t *>(&gps), sizeof(gps_t));
       Serial.write(p.buffer, p.size);
 #endif
@@ -131,7 +123,7 @@ void loop() {
   }
 
   imu_agmpt_t imu;
-  imu.timestamp = now - epoch;
+  imu.timestamp = millis() - epoch;
 
   LSM6DSOX::sox_t s = sox.read();
   
