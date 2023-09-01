@@ -6,6 +6,15 @@
 #include <messages.hpp>
 #include <yivo.hpp>
 
+// #if defined(ARDUINO_ITSYBITSY_M0)
+// #include "gecko2/boards/adafruit/Adafruit_ItsyBitsy_M0.hpp"
+// // #elif defined(__SAMD51__)
+// #elif defined(ARDUINO_ITSYBITSY_M4)
+// #include "gecko2/boards/adafruit/Adafruit_ItsyBitsy_M4.hpp"
+// #elif defined(__APPLE__) || defined(linux)
+// #include "gecko2/boards/generic/generic.hpp"
+// #endif
+
 // constexpr float knots2mps = 0.514444;
 constexpr bool RAW = true;
 #define DEBUG 0
@@ -126,17 +135,17 @@ void loop() {
   imu.timestamp = millis() - epoch;
 
   LSM6DSOX::sox_t s = sox.read();
-  
+
   imu.a.x = s.ax; // g
   imu.a.y = s.ay;
   imu.a.z = s.az;
-  
+
   imu.g.x = s.gx; // rad/s
   imu.g.y = s.gy;
   imu.g.z = s.gz;
-  
+
   LIS3MDL::mag_t mag = lis3mdl.read();
-  
+
   imu.m.x = mag.x; // uT
   imu.m.y = mag.y;
   imu.m.z = mag.z;
