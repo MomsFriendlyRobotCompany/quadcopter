@@ -5,18 +5,10 @@
 #include <gciSensors.hpp>
 #include <messages.hpp>
 #include <yivo.hpp>
+#include <quadcopter.hpp>
 
-// #if defined(ARDUINO_ITSYBITSY_M0)
-// #include "gecko2/boards/adafruit/Adafruit_ItsyBitsy_M0.hpp"
-// // #elif defined(__SAMD51__)
-// #elif defined(ARDUINO_ITSYBITSY_M4)
-// #include "gecko2/boards/adafruit/Adafruit_ItsyBitsy_M4.hpp"
-// #elif defined(__APPLE__) || defined(linux)
-// #include "gecko2/boards/generic/generic.hpp"
-// #endif
+#include "motors.hpp"
 
-// constexpr float knots2mps = 0.514444;
-constexpr bool RAW = true;
 #define DEBUG 0
 
 uint32_t epoch = millis();
@@ -28,6 +20,9 @@ BMP390::gciBMP390 bmp(&Wire);       // pressure
 
 Adafruit_GPS GPS(&Serial1);
 Yivo yivo;
+// imu_agmpt_t imu;
+quad::imu_t imu;
+QuadESC esc;
 
 void setup() {
   //while (!Serial);
@@ -72,6 +67,59 @@ void setup() {
   sox.init();
   lis3mdl.init();
   bmp.init();
+
+  // imu2.accel.x = 1.0f;
+  // imu2.timestamp = millis();
+  // imu2.status = quad::IMU_Status::OK;
+}
+
+void debug_gps() {
+  Serial.printf(">> fix: %d sats: %d ant: %d\n",
+    GPS.fix, GPS.satellites, GPS.antenna);
+
+  Serial.print(">> pos: ");
+  Serial.print(GPS.latitudeDegrees);
+  Serial.print("deg, ");
+  Serial.print(GPS.longitudeDegrees);
+  Serial.print("deg alt: ");
+  Serial.print(GPS.altitude);
+  Serial.print("m HDOP: ");
+  Serial.print(GPS.HDOP);
+  Serial.println("m");
+
+  Serial.printf(">> Date: %d-%d-%d Time: %d:%d:%d\n",
+    GPS.year, GPS.month, GPS.day,
+    GPS.hour, GPS.minute, GPS.seconds);
+
+  Serial.println("------------------------------------");
+}
+
+void check_serial() {
+  if (Serial.available() > 6) {
+    int num = Serial.available();
+    bool ok = false;
+    while (num-- > 0) {
+      uint8_t b = Serial.read();
+      ok = yivo.read(b);
+      if (ok) break;
+    }
+    if (ok) {
+      uint8_t id = yivo.get_buffer_msgid();
+      
+      if (id == quad::CMD_MOTORS) {
+        quad::cmd_motors_t m = yivo.unpack<quad::cmd_motors_t>();
+        esc.set(m);
+      }
+      else if (id == MSG_CALIBRATION) {
+        calibrate_t c = yivo.unpack<calibrate_t>();
+        float params[12];
+        memcpy(params, c.params, 12*sizeof(float));
+        if (c.sensor == calibrate_t::type_t::ACCEL) sox.set_acal(params);
+        else if (c.sensor == calibrate_t::type_t::GYRO) sox.set_gcal(params);
+        else if (c.sensor == calibrate_t::type_t::MAG) lis3mdl.set_cal(params);
+      }
+    }
+  }
 }
 
 void loop() {
@@ -87,7 +135,7 @@ void loop() {
   ts = millis();
 
   if (GPS.newNMEAreceived()) {
-    gps_t gps;
+    satnav_t gps;
     GPS.parse(GPS.lastNMEA());
     if (GPS.fix) {
       gps.lat = GPS.latitudeDegrees; // decimal degrees
@@ -105,61 +153,48 @@ void loop() {
       gps.time.seconds = GPS.seconds;
 
 #if DEBUG == 1
-
-      Serial.printf(">> fix: %d sats: %d ant: %d\n",
-        GPS.fix, GPS.satellites, GPS.antenna);
-
-      Serial.print(">> pos: ");
-      Serial.print(GPS.latitudeDegrees);
-      Serial.print("deg, ");
-      Serial.print(GPS.longitudeDegrees);
-      Serial.print("deg alt: ");
-      Serial.print(GPS.altitude);
-      Serial.print("m HDOP: ");
-      Serial.print(GPS.HDOP);
-      Serial.println("m");
-
-      Serial.printf(">> Date: %d-%d-%d Time: %d:%d:%d\n",
-        GPS.year, GPS.month, GPS.day,
-        GPS.hour, GPS.minute, GPS.seconds);
-
-      Serial.println("------------------------------------");
+      debug_gps();
 #else
-      YivoPack_t p = yivo.pack(MSG_SATNAV, reinterpret_cast<uint8_t *>(&gps), sizeof(gps_t));
-      Serial.write(p.buffer, p.size);
+      YivoPack_t p = yivo.pack(MSG_SATNAV, reinterpret_cast<uint8_t *>(&gps), sizeof(satnav_t));
+      Serial.write(p.data(), p.size());
 #endif
     }
   }
 
-  imu_agmpt_t imu;
+  // imu_agmpt_t imu;
+  quad::imu_t imu;
   imu.timestamp = millis() - epoch;
+  imu.status = quad::IMU_Status::OK;
 
   LSM6DSOX::sox_t s = sox.read();
+  if (s.ok) {
+    imu.accel.x = s.ax; // g
+    imu.accel.y = s.ay;
+    imu.accel.z = s.az;
 
-  imu.a.x = s.ax; // g
-  imu.a.y = s.ay;
-  imu.a.z = s.az;
-
-  imu.g.x = s.gx; // rad/s
-  imu.g.y = s.gy;
-  imu.g.z = s.gz;
+    imu.gyro.x = s.gx; // rad/s
+    imu.gyro.y = s.gy;
+    imu.gyro.z = s.gz;
+  }
+  else imu.status |= (IMU_Status::A_FAIL || IMU_Status::G_FAIL);
 
   LIS3MDL::mag_t mag = lis3mdl.read();
-
-  imu.m.x = mag.x; // uT
-  imu.m.y = mag.y;
-  imu.m.z = mag.z;
+  if (mag.ok) {
+    imu.mag.x = mag.x; // uT
+    imu.mag.y = mag.y;
+    imu.mag.z = mag.z;
+  }
+  else imu.status |= IMU_Status::M_FAIL;
 
   BMP390::pt_t pt = bmp.read();
   if (pt.ok) {
     imu.pressure = pt.press; // Pa
     imu.temperature = pt.temp; // C
   }
+  else imu.status |= IMU_Status::PT_FAIL;
 
   if (DEBUG == 0) {
-    YivoPack_t p = yivo.pack(MSG_IMU_AGMPT, reinterpret_cast<uint8_t *>(&imu), sizeof(imu_agmpt_t));
-    // uint8_t *buff = yivo.get_buffer();
-    // uint16_t size = yivo.get_total_size();
-    Serial.write(p.buffer, p.size);
+    YivoPack_t p = yivo.pack(quad::IMU, reinterpret_cast<uint8_t *>(&imu), sizeof(quad::imu_t));
+    Serial.write(p.data(), p.size());
   }
 }

@@ -1,14 +1,6 @@
-/**
-This is just a generic board layout for testing on my computer instead
-of an Arduino board.
-*/
 #pragma once
-#include <stdint.h>
 
-// this header should only be called if NOT arduino
-class Stream;
-extern Stream Serial;
-extern Stream Serial1;
+// #if defined(__SAMD51__)
 
 constexpr int BOARD_SDA               = 1;
 constexpr int BOARD_SCL               = 1;
@@ -27,10 +19,10 @@ constexpr int BOARD_LED_PIN           = 13;
 constexpr int BOARD_ANALOG_BATTERY    = 15;
 constexpr int BOARD_ANALOG_3V3        = 15;
 
-constexpr bool HAS_NEOPIXEL           = false;
+constexpr int BOARD_BUZZER = 0;
+
+constexpr bool HAS_NEOPIXEL           = true;
 constexpr int BOARD_NEOPIXEL_PIN      = 18;
 
-constexpr Stream* BOARD_USB_SERIAL = &Serial;
-constexpr Stream* BOARD_ALT_SERIAL = &Serial1;
-constexpr Stream* BOARD_ALT1_SERIAL = nullptr;
-constexpr Stream* BOARD_ALT2_SERIAL = nullptr;
+// constexpr Stream* BOARD_USB_SERIAL = &Serial;
+// constexpr Stream* BOARD_ALT_SERIAL = &Serial1;
