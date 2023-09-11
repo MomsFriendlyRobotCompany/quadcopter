@@ -25,7 +25,7 @@ struct __attribute__((packed)) motors_t {
   // status_t status; // bits: m3[6:7], m2[4:5], m1[2:3], m0[0:1]
 };
 
-enum IMU_Status: uint8_t {
+enum class IMU_Status: uint8_t {
   OK      = 0,
   A_FAIL  = 1,
   G_FAIL  = 2,

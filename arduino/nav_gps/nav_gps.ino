@@ -6,10 +6,13 @@
 #include <messages.hpp>
 #include <yivo.hpp>
 #include <quadcopter.hpp>
+#include <gecko2.hpp>
 
 #include "motors.hpp"
 
-#define DEBUG 0
+#define TRUE 1
+#define FALSE 0
+#define DEBUG FALSE
 
 uint32_t epoch = millis();
 uint32_t ts = epoch;
@@ -20,7 +23,6 @@ BMP390::gciBMP390 bmp(&Wire);       // pressure
 
 Adafruit_GPS GPS(&Serial1);
 Yivo yivo;
-// imu_agmpt_t imu;
 quad::imu_t imu;
 QuadESC esc;
 
@@ -152,7 +154,7 @@ void loop() {
       gps.time.minute = GPS.minute;
       gps.time.seconds = GPS.seconds;
 
-#if DEBUG == 1
+#if DEBUG == TRUE
       debug_gps();
 #else
       YivoPack_t p = yivo.pack(MSG_SATNAV, reinterpret_cast<uint8_t *>(&gps), sizeof(satnav_t));
@@ -164,7 +166,7 @@ void loop() {
   // imu_agmpt_t imu;
   quad::imu_t imu;
   imu.timestamp = millis() - epoch;
-  imu.status = quad::IMU_Status::OK;
+  imu.status = static_cast<uint8_t>(quad::IMU_Status::OK);
 
   LSM6DSOX::sox_t s = sox.read();
   if (s.ok) {
@@ -176,7 +178,7 @@ void loop() {
     imu.gyro.y = s.gy;
     imu.gyro.z = s.gz;
   }
-  else imu.status |= (IMU_Status::A_FAIL || IMU_Status::G_FAIL);
+  else imu.status = static_cast<uint8_t>(IMU_Status::A_FAIL) | static_cast<uint8_t>(IMU_Status::G_FAIL);
 
   LIS3MDL::mag_t mag = lis3mdl.read();
   if (mag.ok) {
@@ -184,17 +186,17 @@ void loop() {
     imu.mag.y = mag.y;
     imu.mag.z = mag.z;
   }
-  else imu.status |= IMU_Status::M_FAIL;
+  else imu.status |= static_cast<int>(IMU_Status::M_FAIL);
 
   BMP390::pt_t pt = bmp.read();
   if (pt.ok) {
     imu.pressure = pt.press; // Pa
     imu.temperature = pt.temp; // C
   }
-  else imu.status |= IMU_Status::PT_FAIL;
+  else imu.status |= static_cast<int>(IMU_Status::PT_FAIL);
 
-  if (DEBUG == 0) {
+#if DEBUG == FALSE 
     YivoPack_t p = yivo.pack(quad::IMU, reinterpret_cast<uint8_t *>(&imu), sizeof(quad::imu_t));
     Serial.write(p.data(), p.size());
-  }
+#endif
 }
