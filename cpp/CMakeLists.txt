@@ -85,10 +85,8 @@ LIST(APPEND programs
 
 foreach(exec ${programs})
     add_executable(${exec} src/${exec}.cpp)
-    target_link_libraries(${exec}
-        PRIVATE
-            ${libs}
-    )
+    target_link_libraries(${exec} PRIVATE ${libs})
+    target_include_directories(${exec} PRIVATE include)
 endforeach()
 
 # add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

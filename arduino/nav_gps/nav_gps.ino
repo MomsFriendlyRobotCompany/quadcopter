@@ -14,20 +14,30 @@
 #define FALSE 0
 #define DEBUG FALSE
 
-uint32_t epoch = millis();
-uint32_t ts = epoch;
-
 LSM6DSOX::gciLSM6DSOX sox(&Wire);   // accel and gyro
 LIS3MDL::gciLIS3MDL lis3mdl(&Wire); // magnetometer
 BMP390::gciBMP390 bmp(&Wire);       // pressure
 
 Adafruit_GPS GPS(&Serial1);
 Yivo yivo;
-quad::imu_t imu;
 QuadESC esc;
+Updated<quad::joystick_t> js;
+
+class Timer {
+  public:
+  Timer(): epoch(millis()) {}
+  void hack() { tmp_epoch = millis(); }
+  uint32_t since_hack() { return millis() - tmp_epoch; }
+  uint32_t since_epoch() { return millis() - epoch; }
+
+  protected:
+  uint32_t epoch;
+  uint32_t tmp_epoch;
+};
+
+Timer timer;
 
 void setup() {
-  //while (!Serial);
   Serial.begin(1000000);
   Serial.println("Adafruit GPS library basic parsing test!");
 
@@ -70,9 +80,44 @@ void setup() {
   lis3mdl.init();
   bmp.init();
 
-  // imu2.accel.x = 1.0f;
-  // imu2.timestamp = millis();
-  // imu2.status = quad::IMU_Status::OK;
+  // bool setup_done = false;
+  while (true) {
+    quad::heartbeat_t h;
+    YivoPack_t hb = yivo.pack(quad::HEART_BEAT,reinterpret_cast<uint8_t *>(&h),sizeof(h));
+    Serial.write(hb.data(), hb.size());
+
+    int avail = Serial.available();
+    if (avail <= 6) {
+      delay(100);
+      continue;
+    }
+
+    int num = Serial.available();
+    uint8_t id = 0;
+    while (num-- > 0) {
+      uint8_t b = Serial.read();
+      id = yivo.read(b);
+      if (id > 0) break;
+    }
+    
+    if (id == quad::CALIBRATION) {
+      quad::calibration_t c = yivo.unpack<quad::calibration_t>();
+
+      float params[12];
+      memcpy(params, c.a, 12*sizeof(float));
+      sox.set_acal(params);
+      memcpy(params, c.g, 3*sizeof(float));
+      sox.set_gcal(params);
+      memcpy(params, c.m, 6*sizeof(float));
+      lis3mdl.set_cal(params);
+
+      break;
+    }
+    else if (id == quad::CONTINUE) {
+      quad::continue_t c = yivo.unpack<quad::continue_t>();
+      break;
+    }
+  }
 }
 
 void debug_gps() {
@@ -96,45 +141,50 @@ void debug_gps() {
   Serial.println("------------------------------------");
 }
 
+void reboot() {
+  NVIC_SystemReset();      // processor software reset
+}
+
 void check_serial() {
-  if (Serial.available() > 6) {
-    int num = Serial.available();
-    bool ok = false;
-    while (num-- > 0) {
-      uint8_t b = Serial.read();
-      ok = yivo.read(b);
-      if (ok) break;
-    }
-    if (ok) {
-      uint8_t id = yivo.get_buffer_msgid();
-      
-      if (id == quad::CMD_MOTORS) {
-        quad::cmd_motors_t m = yivo.unpack<quad::cmd_motors_t>();
-        esc.set(m);
-      }
-      else if (id == MSG_CALIBRATION) {
-        calibrate_t c = yivo.unpack<calibrate_t>();
-        float params[12];
-        memcpy(params, c.params, 12*sizeof(float));
-        if (c.sensor == calibrate_t::type_t::ACCEL) sox.set_acal(params);
-        else if (c.sensor == calibrate_t::type_t::GYRO) sox.set_gcal(params);
-        else if (c.sensor == calibrate_t::type_t::MAG) lis3mdl.set_cal(params);
-      }
-    }
+  if (Serial.available() <= 6) return;
+
+  int num = Serial.available();
+  uint8_t id = 0;
+  while (num-- > 0) {
+    uint8_t b = Serial.read();
+    id = yivo.read(b);
+    if (id > 0) break;
   }
+  
+  if (id == quad::CMD_MOTORS) {
+    quad::cmd_motors_t m = yivo.unpack<quad::cmd_motors_t>();
+    esc.set(m);
+  }
+  else if (id == quad::REBOOT) reboot();
+  // else if (id == MSG_CALIBRATION) {
+  //   calibrate_t c = yivo.unpack<calibrate_t>();
+  //   float params[12];
+  //   memcpy(params, c.params, 12*sizeof(float));
+  //   if (c.sensor == calibrate_t::type_t::ACCEL) sox.set_acal(params);
+  //   else if (c.sensor == calibrate_t::type_t::GYRO) sox.set_gcal(params);
+  //   else if (c.sensor == calibrate_t::type_t::MAG) lis3mdl.set_cal(params);
+  // }
 }
 
 void loop() {
+  // timer.update();
 
   GPS.read();
-  uint32_t now = millis();
-  while ((now - ts) < 10) {
+  // uint32_t now = millis();
+  timer.hack();
+  // while ((now - ts) < 10) {
+  while (timer.since_hack() < 10) {
     // delay(1);
     GPS.read();
-    now = millis();
+    // now = millis();
   }
   // // float dt = (now - ts) * 0.001;
-  ts = millis();
+  // ts = millis();
 
   if (GPS.newNMEAreceived()) {
     satnav_t gps;
@@ -163,10 +213,9 @@ void loop() {
     }
   }
 
-  // imu_agmpt_t imu;
   quad::imu_t imu;
-  imu.timestamp = millis() - epoch;
-  imu.status = static_cast<uint8_t>(quad::IMU_Status::OK);
+  imu.timestamp = timer.since_epoch();
+  imu.status = static_cast<uint8_t>(quad::imu_t::IMU_Status::OK);
 
   LSM6DSOX::sox_t s = sox.read();
   if (s.ok) {
@@ -186,14 +235,14 @@ void loop() {
     imu.mag.y = mag.y;
     imu.mag.z = mag.z;
   }
-  else imu.status |= static_cast<int>(IMU_Status::M_FAIL);
+  else imu.status |= static_cast<uint8_t>(IMU_Status::M_FAIL);
 
   BMP390::pt_t pt = bmp.read();
   if (pt.ok) {
     imu.pressure = pt.press; // Pa
     imu.temperature = pt.temp; // C
   }
-  else imu.status |= static_cast<int>(IMU_Status::PT_FAIL);
+  else imu.status |= static_cast<uint8_t>(IMU_Status::PT_FAIL);
 
 #if DEBUG == FALSE 
     YivoPack_t p = yivo.pack(quad::IMU, reinterpret_cast<uint8_t *>(&imu), sizeof(quad::imu_t));
