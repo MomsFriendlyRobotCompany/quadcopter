@@ -5,7 +5,7 @@
 #include <fstream>
 #include <messages.hpp>
 #include "MadgwickAHRS.hpp"
-#include "quad_msgs.hpp"
+#include "quadcopter.hpp"
 
 using namespace std;
 
@@ -15,40 +15,15 @@ using namespace std;
   string port{"/dev/tty.usbmodem14501"};
 #endif
 
-// template<typename T>
-// class Updated {
-//   public:
-//   Updated(): updated(false) {}
-
-//   const T get() {
-//     updated = false;
-//     return value;
-//   }
-
-//   void set(const T& v) {
-//     value = v;
-//     updated = true;
-//   }
-
-//   explicit operator bool() const {
-//     return updated;
-//   }
-
-//   protected:
-//   T value;
-//   bool updated;
-// };
-
-
 Updated<quad::imu_t> gimu;
 Updated<quad::joystick_t> js;
 
 Yivo yivo;
 
-// quad::imu_t imu;
-imu_agmpt_t imu;
+quad::imu_t imu;
+// imu_agmpt_t imu;
 satnav_t gps;
-AHRS ahrs(1.0);
+AHRS<double> ahrs(1.0);
 
 SerialPort ser;
 
@@ -95,22 +70,22 @@ void read_sensors() {
 
   switch (msgid) {
     case quad::IMU:
-      imu = yivo.unpack<imu_agmpt_t>();
+      imu = yivo.unpack<quad::imu_t>();
 
       vec_t a;
-      a.x = ac[0] * imu.a.x + ac[1] * imu.a.y + ac[2] * imu.a.z + ac[3];
-      a.y = ac[4] * imu.a.x + ac[5] * imu.a.y + ac[6] * imu.a.z + ac[7];
-      a.z = ac[8] * imu.a.x + ac[9] * imu.a.y + ac[10] * imu.a.z + ac[11];
+      a.x = ac[0] * imu.accel.x + ac[1] * imu.accel.y + ac[2] * imu.accel.z + ac[3];
+      a.y = ac[4] * imu.accel.x + ac[5] * imu.accel.y + ac[6] * imu.accel.z + ac[7];
+      a.z = ac[8] * imu.accel.x + ac[9] * imu.accel.y + ac[10] * imu.accel.z + ac[11];
 
       vec_t g;
-      g.x = (imu.g.x - gc[0]);
-      g.y = (imu.g.y - gc[1]);
-      g.z = (imu.g.z - gc[2]);
+      g.x = (imu.gyro.x - gc[0]);
+      g.y = (imu.gyro.y - gc[1]);
+      g.z = (imu.gyro.z - gc[2]);
 
       vec_t m;
-      m.x = mc[0] * imu.m.x - mc[3]; // uT
-      m.y = mc[1] * imu.m.y - mc[4];
-      m.z = mc[2] * imu.m.z - mc[5];
+      m.x = mc[0] * imu.mag.x - mc[3]; // uT
+      m.y = mc[1] * imu.mag.y - mc[4];
+      m.z = mc[2] * imu.mag.z - mc[5];
 
       ahrs.update(a, g, m, 0.01);
       publish(ahrs.q);

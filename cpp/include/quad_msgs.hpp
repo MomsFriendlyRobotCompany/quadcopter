@@ -18,7 +18,8 @@ struct __attribute__((packed)) continue_t {
 };
 
 struct __attribute__((packed)) heartbeat_t {
-  uint8_t ok;
+  uint8_t version=1;
+  uint32_t timestamp;
 };
 
 struct __attribute__((packed)) joystick_t {

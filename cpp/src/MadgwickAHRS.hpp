@@ -9,18 +9,19 @@
 // q2 = y
 // q3 = z
 
-constexpr double SMALL = 1E-9;
 
+template<typename T>
 class AHRS {
+  static constexpr T SMALL = 1E-9;
   public:
-  AHRS(double beta=0.1): beta(beta) {}
+  AHRS(T beta=0.1): beta(beta) {}
 
   Quaternion q;
-  double beta; // 2 * proportional gain (Kp)
+  T beta; // 2 * proportional gain (Kp)
 
   // inline
-  double invSqrt(double x) {
-    double ret = 1.0 / sqrt(x);
+  T invSqrt(T x) {
+    T ret = 1.0 / sqrt(x);
     if (isnan(ret)) {
       ret = 0.0;
       std::cout << "crap" << std::endl;
@@ -29,34 +30,34 @@ class AHRS {
   }
 
   // Madgwick
-  void update(vec_t a, vec_t g, vec_t m, double dt) {
-    double gx = g.x;
-    double gy = g.y;
-    double gz = g.z;
-    double ax = a.x;
-    double ay = a.y;
-    double az = a.z;
-    double mx = m.x;
-    double my = m.y;
-    double mz = m.z;
-    double recipNorm;
-    double s0, s1, s2, s3;
-    double qDot1, qDot2, qDot3, qDot4;
-    double hx, hy;
-    double _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1, _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
+  void update(vec_t a, vec_t g, vec_t m, T dt) {
+    T gx = g.x;
+    T gy = g.y;
+    T gz = g.z;
+    T ax = a.x;
+    T ay = a.y;
+    T az = a.z;
+    T mx = m.x;
+    T my = m.y;
+    T mz = m.z;
+    T recipNorm;
+    T s0, s1, s2, s3;
+    T qDot1, qDot2, qDot3, qDot4;
+    T hx, hy;
+    T _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1, _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
 
     // Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
 
-    double mag = mx * mx + my * my + mz * mz;
+    T mag = mx * mx + my * my + mz * mz;
     if(mag > SMALL) {
       update(a, g, dt);
       return;
     }
 
-    double q0 = q.w;
-    double q1 = q.x;
-    double q2 = q.y;
-    double q3 = q.z;
+    T q0 = q.w;
+    T q1 = q.x;
+    T q2 = q.y;
+    T q3 = q.z;
 
     // Rate of change of quaternion from gyroscope
     qDot1 = 0.5 * (-q1 * gx - q2 * gy - q3 * gz);
@@ -66,7 +67,7 @@ class AHRS {
 
     // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
     // if(!((ax == 0.0) && (ay == 0.0) && (az == 0.0))) {
-    double accel = ax * ax + ay * ay + az * az;
+    T accel = ax * ax + ay * ay + az * az;
     if (accel > SMALL) {
 
       // Normalise accelerometer measurement
@@ -119,7 +120,7 @@ class AHRS {
       s2 = -_2q0 * (2.0 * q1q3 - _2q0q2 - ax) + _2q3 * (2.0 * q0q1 + _2q2q3 - ay) - 4.0 * q2 * (1 - 2.0 * q1q1 - 2.0 * q2q2 - az) + (-_4bx * q2 - _2bz * q0) * (_2bx * (0.5 - q2q2 - q3q3) + _2bz * (q1q3 - q0q2) - mx) + (_2bx * q1 + _2bz * q3) * (_2bx * (q1q2 - q0q3) + _2bz * (q0q1 + q2q3) - my) + (_2bx * q0 - _4bz * q2) * (_2bx * (q0q2 + q1q3) + _2bz * (0.5 - q1q1 - q2q2) - mz);
       s3 = _2q1 * (2.0 * q1q3 - _2q0q2 - ax) + _2q2 * (2.0 * q0q1 + _2q2q3 - ay) + (-_4bx * q3 + _2bz * q1) * (_2bx * (0.5 - q2q2 - q3q3) + _2bz * (q1q3 - q0q2) - mx) + (-_2bx * q0 + _2bz * q2) * (_2bx * (q1q2 - q0q3) + _2bz * (q0q1 + q2q3) - my) + _2bx * q1 * (_2bx * (q0q2 + q1q3) + _2bz * (0.5 - q1q1 - q2q2) - mz);
 
-      double ss = s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3;
+      T ss = s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3;
       if (ss > SMALL) {
         recipNorm = invSqrt(ss); // normalise step magnitude
         s0 *= recipNorm;
@@ -149,22 +150,22 @@ class AHRS {
   }
 
   // Mahony
-  void update(vec_t a, vec_t g, double dt) {
-    double gx = g.x;
-    double gy = g.y;
-    double gz = g.z;
-    double ax = a.x;
-    double ay = a.y;
-    double az = a.z;
-    double recipNorm;
-    double s0, s1, s2, s3;
-    double qDot1, qDot2, qDot3, qDot4;
-    double _2q0, _2q1, _2q2, _2q3, _4q0, _4q1, _4q2 ,_8q1, _8q2, q0q0, q1q1, q2q2, q3q3;
+  void update(vec_t a, vec_t g, T dt) {
+    T gx = g.x;
+    T gy = g.y;
+    T gz = g.z;
+    T ax = a.x;
+    T ay = a.y;
+    T az = a.z;
+    T recipNorm;
+    T s0, s1, s2, s3;
+    T qDot1, qDot2, qDot3, qDot4;
+    T _2q0, _2q1, _2q2, _2q3, _4q0, _4q1, _4q2 ,_8q1, _8q2, q0q0, q1q1, q2q2, q3q3;
 
-    double q0 = q.w;
-    double q1 = q.x;
-    double q2 = q.y;
-    double q3 = q.z;
+    T q0 = q.w;
+    T q1 = q.x;
+    T q2 = q.y;
+    T q3 = q.z;
 
     // Rate of change of quaternion from gyroscope
     qDot1 = 0.5 * (-q1 * gx - q2 * gy - q3 * gz);
@@ -174,7 +175,7 @@ class AHRS {
 
     // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
     // if(!((ax == 0.0) && (ay == 0.0) && (az == 0.0))) {
-    double accel = ax * ax + ay * ay + az * az;
+    T accel = ax * ax + ay * ay + az * az;
     if (accel > SMALL) {
       // Normalise accelerometer measurement
       // recipNorm = invSqrt(ax * ax + ay * ay + az * az);
