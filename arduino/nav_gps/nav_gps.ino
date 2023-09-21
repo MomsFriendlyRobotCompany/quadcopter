@@ -69,9 +69,14 @@ void send_heartbeat() {
   Serial.write(hb.data(), hb.size());
 }
 
-// void reboot() {
-//   NVIC_SystemReset();      // processor software reset
-// }
+void reboot() {
+  #if defined(ARDUINO_ITSYBITSY_M4)
+    NVIC_SystemReset();      // processor software reset
+  #elif defined(RASPBERRYPI_PICO)
+    watchdog_enable(1, 1);
+    while(1);
+  #endif
+}
 
 void check_serial() {
   if (Serial.available() <= 6) return;
@@ -88,7 +93,7 @@ void check_serial() {
     quad::cmd_motors_t m = yivo.unpack<quad::cmd_motors_t>();
     esc.set(m);
   }
-  // else if (id == quad::REBOOT) reboot();
+  else if (id == quad::REBOOT) reboot();
   else if (id == quad::CALIBRATION) {
     quad::calibration_t c = yivo.unpack<quad::calibration_t>();
     float params[12];
