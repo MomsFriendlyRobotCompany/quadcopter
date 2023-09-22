@@ -1,14 +1,9 @@
 // #include "MadgwickAHRS.hpp"
-#include <math.h>
+#include <cmath>
 #include <messages.hpp>
 #include <squaternion.hpp>
 
-// constexpr double beta = 0.1f;	// 2 * proportional gain (Kp)
-// q0 = w
-// q1 = x
-// q2 = y
-// q3 = z
-
+using std::sqrt;
 
 template<typename T>
 class AHRS {
@@ -20,6 +15,7 @@ class AHRS {
   T beta; // 2 * proportional gain (Kp)
 
   // inline
+  // FIXME: what is the best way to handle this??? return 0.0 or 1.0?
   T invSqrt(T x) {
     T ret = 1.0 / sqrt(x);
     if (isnan(ret)) {
@@ -44,12 +40,14 @@ class AHRS {
     T s0, s1, s2, s3;
     T qDot1, qDot2, qDot3, qDot4;
     T hx, hy;
-    T _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1, _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;
+    T _2q0mx, _2q0my, _2q0mz, _2q1mx, _2bx, _2bz, _4bx, _4bz, _2q0, _2q1;
+    T _2q2, _2q3, _2q0q2, _2q2q3, q0q0, q0q1, q0q2, q0q3, q1q1, q1q2;
+    T q1q3, q2q2, q2q3, q3q3;
 
     // Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
 
     T mag = mx * mx + my * my + mz * mz;
-    if(mag > SMALL) {
+    if(mag < SMALL) {
       update(a, g, dt);
       return;
     }

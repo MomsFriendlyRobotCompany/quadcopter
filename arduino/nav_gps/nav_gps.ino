@@ -23,14 +23,15 @@ gci::GPS gps;
 
 Yivo yivo;
 QuadESC esc;
-Updated<quad::joystick_t> js;
+// Updated<quad::joystick_t> js;
 
 class Timer {
   public:
   Timer(): epoch(millis()) {}
-  void hack() { tmp_epoch = millis(); }
-  uint32_t since_hack() { return millis() - tmp_epoch; }
-  uint32_t since_epoch() { return millis() - epoch; }
+  inline void hack() { tmp_epoch = millis(); }
+  inline uint32_t since_hack() { return millis() - tmp_epoch; }
+  inline uint32_t since_epoch() { return millis() - epoch; }
+  inline void hack_epoch() { epoch = millis(); }
 
   protected:
   uint32_t epoch;
@@ -38,6 +39,7 @@ class Timer {
 };
 
 Timer timer;
+Timer heartbeat;
 
 void setup() {
   Serial.begin(1000000);
@@ -61,17 +63,27 @@ void setup() {
   sox.init();
   lis3mdl.init();
   bmp.init();
+
+  heartbeat.hack_epoch();
 }
 
 void send_heartbeat() {
   quad::heartbeat_t h;
-  YivoPack_t hb = yivo.pack(quad::HEART_BEAT,reinterpret_cast<uint8_t *>(&h),sizeof(h));
+  h.version = 1;
+  h.health = 0;
+  h.sensors = quad::SensorTypes::ACCELEROMETER | quad::SensorTypes::GYROSCOPE | 
+    quad::SensorTypes::MAGNOMETER | quad::SensorTypes::BAROMETER | 
+    quad::SensorTypes::GPS;
+  h.state = 0;
+  h.timestamp = millis();
+  YivoPack_t hb = yivo.pack(quad::HEARTBEAT,reinterpret_cast<uint8_t *>(&h),sizeof(h));
   Serial.write(hb.data(), hb.size());
 }
 
+// processor software reset
 void reboot() {
   #if defined(ARDUINO_ITSYBITSY_M4)
-    NVIC_SystemReset();      // processor software reset
+    NVIC_SystemReset();      
   #elif defined(RASPBERRYPI_PICO)
     watchdog_enable(1, 1);
     while(1);
@@ -111,12 +123,18 @@ void loop() {
   bool ok = gps.read(c);
   timer.hack();
   while (timer.since_hack() < 10) {
-    for (int i=0; i < 10; ++i) {
+    // for (int i=0; i < 10; ++i) {
+    uint8_t loop = 50;
+    while (loop--) {
       c = gpscomm.read();
       ok = gps.read(c);
       if (ok) break;
+      // Serial.print(".");
+      // Serial.flush();
     }
+    if (ok) break;
   }
+  // Serial.println(" ");
 
   if (ok) {
     satnav_t msg{0};
@@ -204,4 +222,16 @@ void loop() {
     YivoPack_t p = yivo.pack(quad::IMU, reinterpret_cast<uint8_t *>(&imu), sizeof(quad::imu_t));
     Serial.write(p.data(), p.size());
 #endif
+
+  if (heartbeat.since_epoch() > 1000) {
+#if DEBUG == FALSE 
+    // quad::heartbeat_t hb;
+    // YivoPack_t p = yivo.pack(quad::HEARTBEAT, reinterpret_cast<uint8_t *>(&hb), sizeof(quad::heartbeat_t));
+    // Serial.write(p.data(), p.size());
+    send_heartbeat();
+#else
+    Serial.println("--- HEARTBEAT ---");
+#endif
+    heartbeat.hack_epoch();
+  }
 }

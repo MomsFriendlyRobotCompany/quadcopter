@@ -10,21 +10,34 @@ constexpr uint8_t CMD_MOTORS = 128;
 constexpr uint8_t IMU = 129;
 constexpr uint8_t CALIBRATION = 130;
 constexpr uint8_t CONTINUE = 131;
-constexpr uint8_t HEART_BEAT = 132;
+constexpr uint8_t HEARTBEAT = 132;
 constexpr uint8_t REBOOT = 133;
+
+enum SensorTypes: uint16_t {
+  ACCELEROMETER=1,
+  GYROSCOPE=2,
+  MAGNOMETER=4,
+  BAROMETER=8,
+  RANGER=16,
+  GPS=32
+};
 
 struct __attribute__((packed)) continue_t {
   uint8_t ok;
 };
 
 struct __attribute__((packed)) heartbeat_t {
-  uint8_t version=1;
+  uint8_t version;
+  uint8_t state;      // platform specific - idle, flying, etc ...
+  uint8_t health;     // is anything broken?
+  uint16_t sensors;   // what is onboard?
   uint32_t timestamp;
 };
 
-struct __attribute__((packed)) joystick_t {
-  uint16_t ok;
-};
+// too specific ...
+// struct __attribute__((packed)) joystick_t {
+//   uint16_t ok; // twist?
+// };
 
 struct __attribute__((packed)) calibration_t {
   float a[12];
