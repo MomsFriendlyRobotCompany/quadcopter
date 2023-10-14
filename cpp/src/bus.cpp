@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ostream>
 #include <serialcomm/serialcomm.hpp>
 #include <yivo.hpp>
 #include <gecko2.hpp>
@@ -7,25 +8,34 @@
 #include <messages.hpp>
 #include "MadgwickAHRS.hpp"
 #include "quadcopter.hpp"
+#include "command.hpp"
 
 using namespace std;
 
 #if defined(linux)
   string port{"/dev/cu.usbmodem14601"};
 #elif defined(__APPLE__)
-  string port{"/dev/tty.usbmodem14301"};
+  // string port{"/dev/tty.usbmodem14401"};
+  string port;
+  bool found_port = exec("ls /dev/tty.usbmodem*", port);
 #endif
 
-Updated<quad::imu_t> gimu;
-// Updated<quad::joystick_t> js;
+
+// template<>
+std::ostream& operator<<(std::ostream &os, vect_t<double> const &v) {
+  os << "x: " << v.x << " y: " << v.y << " z: " << v.z;
+  return os;
+}
+
+// Updated<quad::imu_t> gimu;
 
 Yivo yivo;
 
 quad::imu_t imu;
-// imu_agmpt_t imu;
 satnav_t gps;
 AHRS<double> ahrs(0.1); // 1.0
-QCF qcf(0.05);
+QCF<double> qcf(0.05);
+TiltCompass<double> tc;
 
 SerialPort ser;
 
@@ -46,6 +56,11 @@ double mc[6]{
   -13.15340002, 29.7714855, 0.0645215};
 
 void setup() {
+  if (found_port == false) {
+    cout << "<<< Couldn't find serial port >>>" << endl;
+    exit(1);
+  }
+  cout << "* Opening serial port: " << port << endl;
   ser.open(port, B1000000);
 
   quad::calibration_t cal;
@@ -72,6 +87,7 @@ void publish(const satnav_t& gps) {
 }
 
 void read_sensors() {
+  static uint64_t count = 0;
 
   int avail = ser.available();
   // cout << avail << flush;
@@ -88,26 +104,55 @@ void read_sensors() {
         case quad::IMU:
           imu = yivo.unpack<quad::imu_t>();
 
+#if 0
           vec_t a;
+          vect_t g;
+          vec_t m;
+#else
+          vect_t<double> a;
+          vect_t<double> g;
+          vect_t<double> m;
+#endif
+
+#if 0
           a.x = ac[0] * imu.accel.x + ac[1] * imu.accel.y + ac[2] * imu.accel.z + ac[3];
           a.y = ac[4] * imu.accel.x + ac[5] * imu.accel.y + ac[6] * imu.accel.z + ac[7];
           a.z = ac[8] * imu.accel.x + ac[9] * imu.accel.y + ac[10] * imu.accel.z + ac[11];
 
-          vec_t g;
           g.x = (imu.gyro.x - gc[0]);
           g.y = (imu.gyro.y - gc[1]);
           g.z = (imu.gyro.z - gc[2]);
 
-          vec_t m;
           m.x = mc[0] * imu.mag.x - mc[3]; // uT
           m.y = mc[1] * imu.mag.y - mc[4];
           m.z = mc[2] * imu.mag.z - mc[5];
+#else
+          a.x = imu.accel.x;
+          a.y = imu.accel.y;
+          a.z = imu.accel.z;
 
+          g.x = imu.gyro.x;
+          g.y = imu.gyro.y;
+          g.z = imu.gyro.z;
+
+          m.x = imu.mag.x; // uT
+          m.y = imu.mag.y;
+          m.z = imu.mag.z;
+#endif
           // ahrs.update(a, g, m, 0.01);
-          ahrs.update(a, g, 0.01);
-          qcf.update(a.x,a.y,a.z, g.x,g.y,g.z, 0.01);
+          // ahrs.update(a, g, 0.01);
           // publish(ahrs.q);
-          publish(qcf.q);
+
+          // qcf.update(a, g, 0.01);
+          // publish(qcf.q);
+
+          if (count++ % 50 == 0) {
+            // cout << "a: " << a << "  m: " << m << endl;
+            cout << "a: " << a << "  g: " << g << endl;
+            // cout << "a: " << a << "  g: " << g << "  m: " << m  << endl;
+          }
+
+          // publish(tc.update(a, m));
           break;
 
         case MSG_SATNAV:
@@ -135,33 +180,6 @@ void control() {
 }
 
 void loop() {
-  // ser.open(port, B1000000);
-
-  // read config file
-
-  // setup calibration ----------------
-  // while (true) {
-  //   // quad::continue_t c;
-  //   // YivoPack_t m = yivo.pack(quad::CONTINUE, reinterpret_cast<uint8_t *>(&c), sizeof(c));
-  //   // ser.write(m.data(), m.size());
-
-  //   uint8_t msgid = 0;
-  //   int avail = ser.available();
-  //   if (avail <= 6) continue;
-
-  //   for (int i = 0; i < avail; ++i) {
-  //     char c = ser.read();
-  //     msgid = yivo.read(c);
-  //     if (msgid > 0) break;
-  //   }
-
-  //   if (msgid == quad::HEART_BEAT) {
-  //     quad::heartbeat_t h = yivo.unpack<quad::heartbeat_t>();
-  //     break; // break out of setup loop
-  //   }
-
-  //   gecko::msleep(10);
-  // }
 
   // main loop --------------------
   while (true) {

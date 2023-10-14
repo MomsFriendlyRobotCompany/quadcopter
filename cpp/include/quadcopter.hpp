@@ -15,7 +15,7 @@
   //       || defined(ARDUINO_ADAFRUIT_QTPY_RP2040)
   // #elif defined(ARDUINO_RASPBERRY_PI_PICO)
   #elif defined(RASPBERRYPI_PICO)
-    #include "boards/generic.hpp"
+    #include "boards/Pi_Pico.hpp"
   // #else
   //   #include "boards/generic.hpp"
   #endif

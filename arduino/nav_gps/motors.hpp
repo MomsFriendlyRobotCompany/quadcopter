@@ -41,9 +41,9 @@ constexpr int MOTOR_ZERO_LEVEL = 1000;
 constexpr int MOTOR_ARM_START  = 1500;
 
 
-class QuadESC {
+class QuadPwmEsc {
 public:
-  QuadESC(): armed(false),
+  QuadPwmEsc(): armed(false),
       motor0_val(MOTOR_ZERO_LEVEL),
       motor1_val(MOTOR_ZERO_LEVEL),
       motor2_val(MOTOR_ZERO_LEVEL),
@@ -55,7 +55,7 @@ public:
     motor3.attach(BOARD_PIN_MOTOR3, MOTOR_ZERO_LEVEL, MOTOR_MAX_LEVEL);
   }
 
-  ~QuadESC() {
+  ~QuadPwmEsc() {
     if (armed) disarm();
 
     motor0.writeMicroseconds(MOTOR_ZERO_LEVEL);

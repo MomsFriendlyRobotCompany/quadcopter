@@ -193,13 +193,13 @@ void loop() {
 
   LSM6DSOX::sox_t s = sox.read();
   if (s.ok) {
-    imu.accel.x = s.ax; // g
-    imu.accel.y = s.ay;
-    imu.accel.z = s.az;
+    imu.accel.x = s.a.x; // g
+    imu.accel.y = s.a.y;
+    imu.accel.z = s.a.z;
 
-    imu.gyro.x = s.gx; // rad/s
-    imu.gyro.y = s.gy;
-    imu.gyro.z = s.gz;
+    imu.gyro.x = s.g.x; // rad/s
+    imu.gyro.y = s.g.y;
+    imu.gyro.z = s.g.z;
   }
   else imu.status = static_cast<uint8_t>(IMU_Status::A_FAIL) | static_cast<uint8_t>(IMU_Status::G_FAIL);
 
