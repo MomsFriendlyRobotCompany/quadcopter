@@ -9,6 +9,7 @@ other-vo/
 *.heic
 video_odometry/jupyter/arducam/*.pkl
 *.pkl
+old
 
 archive
 

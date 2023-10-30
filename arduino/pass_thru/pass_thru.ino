@@ -7,54 +7,28 @@
 #include <yivo.hpp>
 #include <quadcopter.hpp>
 #include <gecko2.hpp>
-// #include <ADCInput.h>
 
-
-#define TRUE 1
-#define FALSE 0
 #define YIVO FALSE
-#define USB_BAUD_1MBPS 1000000
-#define I2C_400K 400000
-#define I2C_100K 100000
+
+using gecko::mtime;
+using gecko::utime;
+using gecko::msleep;
+using gecko::usleep;
+using gecko::sleep;
+
 
 // https://arduino-pico.readthedocs.io/en/latest/serial.html
 // Serial1 is UART0, and Serial2 is UART1
-#define gpscomm Serial2
+// #define gpscomm Serial2
 
 LSM6DSOX::gciLSM6DSOX sox(&Wire);   // accel and gyro
 LIS3MDL::gciLIS3MDL lis3mdl(&Wire); // magnetometer
 BMP390::gciBMP390 bmp(&Wire);       // pressure
 gci::GPS gps;
 
+SystemStatus_t systemStatus;
+
 Yivo yivo;
-
-class Update {
-  const uint32_t msec;
-  uint32_t epoch;
-
-  public:
-  Update(const uint32_t msec): msec(msec), epoch(millis()) {}
-
-  explicit operator bool() {
-    uint32_t now = millis();
-    if ((now - epoch) >= msec) {
-      epoch = now;
-      return true;
-    }
-    return false;
-  }
-};
-
-// move usec?
-enum UpdateHertz: uint32_t {
-  UPDATE_1HZ = 1000,
-  UPDATE_2HZ = 500,
-  UPDATE_10HZ = 100,
-  UPDATE_50HZ = 20,
-  UPDATE_100HZ = 10,
-  UPDATE_500HZ = 2,
-  UPDATE_1000HZ = 1
-};
 
 Update heartbeatUpdate(UPDATE_1HZ);
 Update inertialUpdate(UPDATE_100HZ);
@@ -63,19 +37,23 @@ Update ptUpdate(UPDATE_2HZ);
 
 
 void setup() {
-  Serial.begin(USB_BAUD_1MBPS);
+  usbcomm.begin(USB_BAUD);
 
-  gpscomm.setTX(8);
-  gpscomm.setRX(9);
-  // gpscomm.setFIFOSize(128);
+  // rpicomm.setTX(BOARD_RPI_TX);
+  // rpicomm.setRX(BOARD_RPI_RX);
+  // rpicomm.begin(RPI_BAUD);
+
+  gpscomm.setTX(BOARD_GPS_TX);
+  gpscomm.setRX(BOARD_GPS_RX);
+  gpscomm.setFIFOSize(128);
   gpscomm.begin(9600);
   gpscomm.print(GCI_BAUD_115200);
 
   delay(500);
 
   gpscomm.begin(115200);
-  gpscomm.print(GCI_RMCGGA);
-  // gpscomm.print(GCI_GGA);
+  // gpscomm.print(GCI_RMCGGA);
+  gpscomm.print(GCI_GGA);
   gpscomm.print(GCI_UPDATE_1HZ);
   gpscomm.print(GCI_NOANTENNA);
 
@@ -103,8 +81,6 @@ void setup() {
 }
 
 void send_heartbeat() {
-  if (!heartbeatUpdate) return;
-
   quad::heartbeat_t h;
   h.version = 1;
   h.health = 0;
@@ -128,19 +104,38 @@ void send_heartbeat() {
 #endif
 }
 
-void get_gps() {
-  if (!gpsUpdate) return;
-
+gci::GpsID get_gps_msg() {
+  int loop = gpscomm.available();
+  // usbcomm.print(">> loop: ");
+  // usbcomm.println(loop);
   bool ok = false;
-  for (uint8_t loop=255; loop; --loop) {
-    int c = gpscomm.read();
-    ok = gps.read(c);
-    if (ok) break;
+  int c;
+  while (--loop >= 0) {
+    // usbcomm.print(".");
+    c = gpscomm.read();
+    if (c == -1) continue;
+    // if (char(c) == '\r' || char(c) == '\n') usbcomm.println("RETURNS");
+    // usbcomm.print(char(c));
+    ok = gps.read(char(c));
+    if (ok) {
+      // usbcomm.println("ok == true");
+      break;
+    }
   }
-  if (ok == false) return; // no message found
 
+  // if (ok) usbcomm.println("FOUND");
+  // else usbcomm.println("MISSED");
+
+  if (ok) return gps.get_id();
+  return gci::GpsID::NONE;
+}
+
+void get_gps() {
+  bool ok = false;
   satnav_t msg{0};
-  gci::GpsID id = gps.get_id();
+  
+  gci::GpsID id = get_gps_msg();
+
   if (id == gci::GpsID::GGA) {
     gga_t gga{0};
     ok = gps.get_msg(gga);
@@ -166,7 +161,10 @@ void get_gps() {
     msg.date.day = rmc.date.day;
     msg.date.year = rmc.date.year;
   }
-  else return;
+  else {
+    // usbcomm.println("X");
+    return;
+  }
       
 #if YIVO == TRUE 
   YivoPack_t p = yivo.pack(MSG_SATNAV, reinterpret_cast<uint8_t *>(&msg), sizeof(satnav_t));
@@ -181,8 +179,6 @@ void get_gps() {
 }
 
 void get_inertial() {
-  if (!inertialUpdate) return;
-
   quad::imu_t imu;
   imu.timestamp = millis();
   imu.status = static_cast<uint8_t>(IMU_Status::GOOD);
@@ -211,13 +207,11 @@ void get_inertial() {
   YivoPack_t p = yivo.pack(quad::IMU, reinterpret_cast<uint8_t *>(&imu), sizeof(quad::imu_t));
   Serial.write(p.data(), p.size());
 #else
-  // Serial.println("imu");
+  Serial.println("imu");
 #endif
 }
 
 void get_pt() {
-  if (!ptUpdate) return;
-
   atmospheric_t msg;
 
   BMP390::pt_t pt = bmp.read();
@@ -238,8 +232,9 @@ void get_pt() {
 }
 
 void loop() {
-  get_gps();
-  // get_inertial();
-  // get_pt();
-  send_heartbeat();
+  if (gpsUpdate) get_gps();
+  // if (inertialUpdate) get_inertial();
+  // if (ptUpdate) get_pt();
+  if (heartbeatUpdate) send_heartbeat();
+  // usbcomm.println("-");
 }

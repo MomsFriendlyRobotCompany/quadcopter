@@ -30,9 +30,9 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 
 ## Dependancies
 
-- `gciSensors`: imu, pressure, temperature
-- `gciGps`: gps
-- `gecko2`
+- `gciSensors`: imu, pressure, temperature sensors using I2C
+- `gciGps`: gps using serial port
+- `gecko2`: misc
 
 ## Resources and Other Projects
 
@@ -40,14 +40,16 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 - BSD: [PX4 Estimation and Control Library (ECL)](https://github.com/PX4/PX4-ECL)
 - BSD: [PX4 Matrix](https://github.com/PX4/PX4-Autopilot/tree/4a3d64f1d76856d22323d1061ac6e560efda0a05/src/lib/matrix)
 - BSD: [InertialNav](https://github.com/priseborough/InertialNav)
-- BSD: [Pico SDK](https://github.com/raspberrypi/pico-sdk/tree/master)
-- BSD: [Pico Examples]()
+- BSD: [Pico SDK](https://github.com/raspberrypi/pico-sdk)
+- BSD: [Pico Examples](https://github.com/raspberrypi/pico-examples)
 - GPL: [Ardupilot](https://github.com/ArduPilot/ardupilot)
 - GPL: [Crazyflie](https://github.com/bitcraze/crazyflie-firmware)
 - GPL: [A Simple and Cool Flight Controller (Pi Pico)](https://github.com/victorhook/asac-fc)
 - GPL: [asac-gui (tk)](https://github.com/victorhook/asac-gcs/tree/main)
 
 - [ESC Configurator](https://esc-configurator.com)
+
+- [Arduino Pico](https://github.com/earlephilhower/arduino-pico)
 
 # MIT License
 
