@@ -5,15 +5,14 @@
 // #include "pico/binary_info.h"
 #include "hardware/adc.h"
 
-constexpr uint A0 = 0;
-constexpr uint A1 = 1;
-constexpr uint A2 = 2;
-constexpr uint A3 = 3;
+constexpr uint A0         = 0;
+constexpr uint A1         = 1;
+constexpr uint A2         = 2;
+constexpr uint A3         = 3;
 constexpr float ADC_SCALE = 3.3f / (1 << 12);
 
-
 class ADC {
-  public:
+public:
   ADC() { adc_init(); }
   ~ADC() {}
 
@@ -31,10 +30,7 @@ class ADC {
     return adc_read();
   }
 
-  inline
-  float read(const uint pin) {
-    return ADC_SCALE * read_raw(pin);
-  }
+  inline float read(const uint pin) { return ADC_SCALE * read_raw(pin); }
 };
 
 // template<uint pin>

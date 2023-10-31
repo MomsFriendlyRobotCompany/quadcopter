@@ -18,15 +18,18 @@ enum gpio_function {
 
 #include "hardware/watchdog.h"
 #include "tusb.h" // wait for USB
-#include "defs.hpp"
-#include "gps.hpp"
-#include "pwm.hpp"
-#include "led.hpp"
 
-#include <messages.hpp>
+#include "defs.hpp"
+// #include "gps.hpp"
+#include "led.hpp"
+#include "pwm.hpp"
+#include "memory.hpp"
+
+#include <gcigps.hpp>
 #include <gciSensors.hpp>
-#include <yivo.hpp>
+#include <messages.hpp>
 #include <squaternion.hpp>
+#include <yivo.hpp>
 
 using namespace std;
 using namespace LSM6DSOX;
@@ -34,6 +37,7 @@ using namespace BMP390;
 using namespace LIS3MDL;
 using namespace gci::sensors;
 
+gci::GPS gps;
 gciLIS3MDL mag;
 gciLSM6DSOX imu;
 gciBMP390 bmp;
@@ -49,6 +53,16 @@ Servo m0;
 Servo m1;
 Servo m2;
 Servo m3;
+
+bool callback_100hz(struct repeating_timer *t) {
+  memory.timer100hz = true;
+  return true;
+}
+
+bool callback_1hz(struct repeating_timer *t) {
+  memory.timer1hz = true;
+  return true;
+}
 
 int main() {
   stdio_init_all();
@@ -76,13 +90,13 @@ int main() {
   bool ok = adc.init(ADC_BATT_PIN);
   if (ok == false) printf("*** Error ADC battery ***\n");
 
-  Serial0.init(115200,0,UART0_TX_PIN,UART0_RX_PIN);
+  Serial0.init(115200, 0, UART0_TX_PIN, UART0_RX_PIN);
 
   imu.init_tw(i2c_port);
   while (true) {
-    uint8_t err = imu.init(ACCEL_RANGE_4_G, GYRO_RANGE_2000_DPS, RATE_208_HZ);
+    uint8_t err = imu.init(ACCEL_RANGE_4_G, GYRO_RANGE_2000_DPS, RATE_104_HZ);
     if (err == 0) break;
-    puts("imu error");
+    printf("*** imu error: %d ***\n", err);
     sleep_ms(1000);
   }
 
@@ -90,15 +104,15 @@ int main() {
   while (true) {
     int err = bmp.init(BMP390::OS_MODE_PRES_16X_TEMP_2X);
     if (err == 0) break;
-    puts("bmp error");
+    printf("*** bmp error: %d ***\n", err);
     sleep_ms(1000);
   }
 
   mag.init_tw(i2c_port);
   while (true) {
-    int err = mag.init(RANGE_4GAUSS,ODR_155HZ);
+    int err = mag.init(RANGE_4GAUSS, ODR_155HZ);
     if (err == 0) break;
-    puts("mag error");
+    printf("*** mag error: %d ***\n", err);
     sleep_ms(1000);
   }
 
@@ -106,7 +120,7 @@ int main() {
   led_init();
 
   // GPS ///////////////////////////
-  Serial1.init(9600,1,UART1_TX_PIN,UART1_RX_PIN);
+  Serial1.init(9600, 1, UART1_TX_PIN, UART1_RX_PIN);
   Serial1.write(GCI_GGA, sizeof(GCI_GGA));
   Serial1.write(GCI_UPDATE_1HZ, sizeof(GCI_UPDATE_1HZ));
   Serial1.write(GCI_NOANTENNA, sizeof(GCI_NOANTENNA));
@@ -114,37 +128,66 @@ int main() {
   // uint baud = Serial1.set_baud(115200);
   // printf("/-- UART is reset to %u baud --/\n", baud);
 
-
   // Servo /////////////////////////
   m0.init(pwm_m0);
   m1.init(pwm_m1);
   m2.init(pwm_m2);
   m3.init(pwm_m3);
 
+  struct repeating_timer timer_100hz;
+  add_repeating_timer_ms(-10, callback_100hz, NULL, &timer_100hz);
+  struct repeating_timer timer_1hz;
+  add_repeating_timer_ms(-1000, callback_1hz, NULL, &timer_1hz);
+
   sleep_ms(100);
 
   while (1) {
-    float batt = adc.read(ADC_BATT_PIN);
-    // printf("battery: %f\n", batt);
+    if (memory.timer100hz == true) {
+      const LIS3MDL::mag_t m = mag.read_cal();
+      if (m.ok) {
+        printf("mag: %f %f %f\n", m.x, m.y, m.z);
+      }
 
-    pt_t pt = bmp.read();
-    if (pt.ok) {
-      printf("press: %f   temp: %f\n", pt.press, pt.temp);
+      sox_t i = imu.read();
+      if (i.ok) {
+        printf("accel: %f %f %f  gyro: %f %f %f\n", i.a.x, i.a.y, i.a.z, i.g.x,
+              i.g.y, i.g.z);
+      }
+
+      memory.status = SET_BITS(memory.status, STATUS_ACCELS|STATUS_GYROS|STATUS_MAGS);
+      memory.timer100hz = false;
     }
 
-    const LIS3MDL::mag_t m = mag.read_cal();
-    if (m.ok) {
-      printf("mag: %f %f %f\n", m.x, m.y, m.z);
-    }
+    if (memory.timer1hz == true) {
+      pt_t pt = bmp.read();
+      if (pt.ok) {
+        printf("press: %f   temp: %f\n", pt.press, pt.temp);
+      }
 
-    sox_t i = imu.read();
-    if (i.ok) {
-      printf("accel: %f %f %f  gyro: %f %f %f\n", i.a.x, i.a.y, i.a.z, i.g.x, i.g.y, i.g.z);
-    }
+      bool ok = false;
+      while (Serial1.available()) {
+        char c = (char)Serial1.read();
+        ok = gps.read(c);
+        if (ok) break;
+      }
 
-    getGps(&Serial1);
+      if (ok) {
+        gga_t gga;
+        gci::GpsID id = gps.get_id();
+        if (id == gci::GpsID::GGA) {
+          ok = gps.get_msg(gga);
+          if (ok) printf("GGA lat: %f lon: %f\n", gga.lat, gga.lon);
+          else printf("Bad parsing\n");
+        }
+      }
+
+      float batt = adc.read(ADC_BATT_PIN);
+      // printf("battery: %f\n", batt);
+
+      memory.status = SET_BITS(memory.status, STATUS_PRESS|STATUS_TEMP|STATUS_GPS|STATUS_BATTERY);
+      memory.timer1hz = false;
+    }
 
     watchdog_update();
-
   }
 }

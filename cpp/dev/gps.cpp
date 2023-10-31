@@ -5,10 +5,10 @@ $PMTK001,220,3*30 - update rate
 $PGACK,33,0*6E - no antenna
 */
 
-#include <stdio.h>
-#include "pico/stdlib.h"
 #include "pico/binary_info.h"
+#include "pico/stdlib.h"
 #include "tusb.h" // wait for USB
+#include <stdio.h>
 
 #include "gcigps.hpp"
 #include "uart.hpp"
@@ -26,35 +26,23 @@ int main() {
     sleep_ms(100);
   }
 
-  uint baud = Serial1.init(9600,1,UART1_TX_PIN,UART1_RX_PIN);
+  uint baud = Serial1.init(9600, 1, UART1_TX_PIN, UART1_RX_PIN);
 
   if (Serial1.is_enabled()) printf("Serial1 is enabled\n");
   printf("/-- UART is set to %u baud --/\n", baud);
 
   Serial1.write(GCI_GGA, sizeof(GCI_GGA));
-  sleep_ms(10);
-  while(Serial1.available()) printf("%c", Serial1.read());
-
   Serial1.write(GCI_UPDATE_1HZ, sizeof(GCI_UPDATE_1HZ));
-  sleep_ms(10);
-  while(Serial1.available()) printf("%c", Serial1.read());
-
   Serial1.write(GCI_NOANTENNA, sizeof(GCI_NOANTENNA));
-  sleep_ms(10);
-  while(Serial1.available()) printf("%c", Serial1.read());
-
   Serial1.write(GCI_BAUD_115200, sizeof(GCI_BAUD_115200));
-  baud = Serial1.set_baud(115200);
-  sleep_ms(500);
-  while(Serial1.available()) printf("%c", Serial1.read());
 
+  sleep_ms(500);
+  baud = Serial1.set_baud(115200);
   printf("/-- UART is reset to %u baud --/\n", baud);
 
-  sleep_ms(100);
+  Serial1.flush();
 
   while (1) {
-    sleep_ms(10);
-
     bool ok = false;
     while (Serial1.available() > 0) {
       // printf(".");
@@ -72,7 +60,7 @@ int main() {
       ok = gps.get_msg(gga);
       if (ok) printf("GGA lat: %f lon: %f\n", gga.lat, gga.lon);
       else printf("*** Bad parsing ***\n");
-      printf("buffer: %hu\n", Serial1.available());
+      // printf("buffer: %hu\n", Serial1.available());
     }
   }
 

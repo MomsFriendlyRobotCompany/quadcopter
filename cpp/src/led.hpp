@@ -1,11 +1,9 @@
 
 #pragma once
 
-
-#include "hardware/pio.h"
-#include "hardware/clocks.h"
 #include "blink.pio.h"
-
+#include "hardware/clocks.h"
+#include "hardware/pio.h"
 
 void blink_pin_forever(PIO pio, uint sm, uint offset, uint pin, uint freq) {
   blink_program_init(pio, sm, offset, pin);
@@ -19,7 +17,7 @@ void blink_pin_forever(PIO pio, uint sm, uint offset, uint pin, uint freq) {
 }
 
 void led_init() {
-  PIO pio = pio0;
+  PIO pio     = pio0;
   uint offset = pio_add_program(pio, &blink_program);
   // printf("Loaded program at %d\n", offset);
   blink_pin_forever(pio, 0, offset, LED_PIN, 1);

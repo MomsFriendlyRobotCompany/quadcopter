@@ -27,10 +27,9 @@
 //   void init(uint baud, uint8_t port, uint8_t pin_sda, uint8_t pin_scl) {
 //     if (port == 0) i2c = i2c0;
 //     else if (port == 1) i2c = i2c1;
-//     // This example will use I2C0 on the default SDA and SCL pins (GP4, GP5 on a Pico)
-//     i2c_init(i2c, baud);
-//     gpio_set_function(pin_sda, GPIO_FUNC_I2C);
-//     gpio_set_function(pin_scl, GPIO_FUNC_I2C);
+//     // This example will use I2C0 on the default SDA and SCL pins (GP4, GP5
+//     on a Pico) i2c_init(i2c, baud); gpio_set_function(pin_sda,
+//     GPIO_FUNC_I2C); gpio_set_function(pin_scl, GPIO_FUNC_I2C);
 //     gpio_pull_up(pin_sda);
 //     gpio_pull_up(pin_scl);
 //     // Make the I2C pins available to picotool
@@ -56,7 +55,8 @@
 //     i2c_write_blocking(i2c, addr, out, 2, I2C_RELEASE_BUS);
 //   }
 
-//   bool read(const uint8_t reg, const uint8_t data_size, uint8_t *const data) {
+//   bool read(const uint8_t reg, const uint8_t data_size, uint8_t *const data)
+//   {
 //     i2c_write_blocking(i2c, addr, &reg, 1, I2C_HOLD_BUS);
 //     int ret = i2c_read_blocking(i2c, addr, data, data_size, I2C_RELEASE_BUS);
 //     if (ret < 0) return false;

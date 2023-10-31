@@ -1,7 +1,9 @@
 list(APPEND examples
     timer
     servo
+    servo2
     gps
+    ext_int
 )
 
 # message(STATUS "Examples ----------------------")

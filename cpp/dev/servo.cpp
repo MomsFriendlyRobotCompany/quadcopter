@@ -1,8 +1,8 @@
 
-#include <stdio.h>
-#include "pico/stdlib.h"
 #include "pico/binary_info.h"
+#include "pico/stdlib.h"
 #include "tusb.h" // wait for USB
+#include <stdio.h>
 
 #include "pwm.hpp"
 
@@ -24,7 +24,7 @@ int main() {
   printf("CW: ");
 
   while (1) {
-    for (uint16_t us=1000; us<=2000; us+=20) {
+    for (uint16_t us = 1000; us <= 2000; us += 20) {
       s.write_us(us);
       sleep_ms(SLEEP);
       printf(".");
@@ -32,7 +32,7 @@ int main() {
 
     printf("\nCCW:");
 
-    for (uint16_t us=2000; us>=1000; us-=20) {
+    for (uint16_t us = 2000; us >= 1000; us -= 20) {
       s.write_us(us);
       sleep_ms(SLEEP);
       printf(".");
