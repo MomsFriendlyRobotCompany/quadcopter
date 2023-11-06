@@ -4,6 +4,8 @@
 #include <gcigps.hpp>
 #include <gciSensors.hpp>
 
+#include "trigger.hpp"
+
 using gci::sensors::vecf_t;
 
 
@@ -31,11 +33,11 @@ struct SharedMemory_t {
   gga_t gps;
   float battery;
 
-  bool timer100hz = false;
-  bool timer1hz = false;
+  Trigger timer100hz;
+  Trigger timer1hz;
   // bool
 
-  uint16_t status;
+  uint16_t status; // which is better?
 };
 
 static

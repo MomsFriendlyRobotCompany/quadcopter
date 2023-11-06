@@ -17,7 +17,7 @@ public:
   inline const uint16_t size() const volatile { return numElem; }
   inline bool isFull() volatile { return numElem >= BUFFER_SIZE; }
   inline bool isEmpty() volatile { return numElem == 0; }
-  uint16_t nextPos(const size_t pos) volatile {
+  inline uint16_t nextPos(const size_t pos) volatile {
     return (pos + 1) % BUFFER_SIZE;
   }
 

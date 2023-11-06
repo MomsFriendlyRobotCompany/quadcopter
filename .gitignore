@@ -16,3 +16,5 @@ archive
 *.bz2
 *.zip
 *.log
+
+c_library_v*

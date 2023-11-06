@@ -31,6 +31,8 @@ enum gpio_function {
 #include <squaternion.hpp>
 #include <yivo.hpp>
 
+#include <mavlink.h>
+
 using namespace std;
 using namespace LSM6DSOX;
 using namespace BMP390;
@@ -55,12 +57,18 @@ Servo m2;
 Servo m3;
 
 bool callback_100hz(struct repeating_timer *t) {
-  memory.timer100hz = true;
+  memory.timer100hz.set();
+  return true;
+}
+
+
+bool callback_10hz(struct repeating_timer *t) {
+  memory.timer10hz.set();
   return true;
 }
 
 bool callback_1hz(struct repeating_timer *t) {
-  memory.timer1hz = true;
+  memory.timer1hz.set();
   return true;
 }
 
@@ -141,6 +149,26 @@ int main() {
 
   sleep_ms(100);
 
+
+  mavlink_message_t message;
+
+  const uint8_t system_id = 42;
+  const uint8_t base_mode = 0;
+  const uint8_t custom_mode = 0;
+  mavlink_msg_heartbeat_pack_chan(
+    system_id,
+    MAV_COMP_ID_PERIPHERAL,
+    MAVLINK_COMM_0,
+    &message,
+    MAV_TYPE_GENERIC,
+    MAV_AUTOPILOT_GENERIC,
+    base_mode,
+    custom_mode,
+    MAV_STATE_STANDBY);
+
+  uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
+  const int len = mavlink_msg_to_send_buffer(buffer, &message);
+
   while (1) {
     if (memory.timer100hz == true) {
       const LIS3MDL::mag_t m = mag.read_cal();
@@ -155,7 +183,7 @@ int main() {
       }
 
       memory.status = SET_BITS(memory.status, STATUS_ACCELS|STATUS_GYROS|STATUS_MAGS);
-      memory.timer100hz = false;
+      // memory.timer100hz = false;
     }
 
     if (memory.timer1hz == true) {
@@ -185,7 +213,7 @@ int main() {
       // printf("battery: %f\n", batt);
 
       memory.status = SET_BITS(memory.status, STATUS_PRESS|STATUS_TEMP|STATUS_GPS|STATUS_BATTERY);
-      memory.timer1hz = false;
+      // memory.timer1hz = false;
     }
 
     watchdog_update();
