@@ -2,9 +2,7 @@
 
 ## Arduino
 
-- `nav_gps`: some testing with navigation
-- `pass_thru`: the uC does nothing but immediately copy sensor data to serial port
-- `quadcopter`: this is the real quadcopter software
+misc
 
 ## Cpp
 
@@ -32,7 +30,22 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 
 - `gciSensors`: imu, pressure, temperature sensors using I2C
 - `gciGps`: gps using serial port
+- `squaternions`: quaternion math
 - `gecko2`: misc
+
+- [NOAA WMM data](https://www.ncei.noaa.gov/magnetic-model-survey-page?redirect=wmm-coefficients)
+
+- python:
+    - Qt5 Instrument Panel: [pyEfis](https://github.com/makerplane/pyEfis)
+    - MIT: [pygeomag](https://github.com/boxpet/pygeomag/tree/main)
+        - Format of data: https://www.ngdc.noaa.gov/geomag/WMM/wmmformat.shtml
+        ```python
+        >>> from pygeomag import GeoMag
+        >>> geo_mag = GeoMag()
+        >>> result = geo_mag.calculate(glat=47.6205, glon=-122.3493, alt=0, time=2023.75)
+        >>> print(result.d)
+        15.25942260585284
+        ```
 
 ## Resources and Other Projects
 
@@ -49,7 +62,11 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 
 - [ESC Configurator](https://esc-configurator.com)
 
+- [simulator: flightmare](https://flightmare.readthedocs.io/en/latest/getting_started/readme.html)
+
 - [Arduino Pico](https://github.com/earlephilhower/arduino-pico)
+
+- [Udacity Quadcopter EKF](https://github.com/Ashutosh-Badave/4.EKF_estimator_for_Drone)
 
 # MIT License
 

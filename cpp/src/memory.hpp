@@ -3,6 +3,7 @@
 
 #include <gcigps.hpp>
 #include <gciSensors.hpp>
+#include <squaternions.hpp>
 
 #include "trigger.hpp"
 
@@ -28,16 +29,17 @@ struct SharedMemory_t {
   vecf_t mags;
   vecf_t pos;
   vecf_t vel;
+
   float pressure;
   float temperature;
   gga_t gps;
   float battery;
 
   Trigger timer100hz;
+  Trigger timer10hz;
   Trigger timer1hz;
-  // bool
 
-  uint16_t status; // which is better?
+  uint16_t status; // which values
 };
 
 static
