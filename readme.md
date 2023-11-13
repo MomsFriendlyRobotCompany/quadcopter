@@ -68,6 +68,8 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 
 - [Udacity Quadcopter EKF](https://github.com/Ashutosh-Badave/4.EKF_estimator_for_Drone)
 
+- github: [python computer vision](https://github.com/timmarkhuff/horizon_detector/tree/main) flying plane
+
 - [Open source signal analyzer](sigrok.org)
     - [pulseview github](https://github.com/sigrokproject)
     - [pico as a signal analyzer](https://github.com/dotcypress/ula)

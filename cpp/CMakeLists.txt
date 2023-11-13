@@ -127,7 +127,8 @@ target_link_libraries(
         hardware_pwm
         hardware_dma
         hardware_irq
-        # hardware_spi
+        hardware_spi
+        hardware_rtc
         ${libs}
 )
 

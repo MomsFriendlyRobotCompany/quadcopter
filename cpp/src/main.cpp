@@ -51,6 +51,7 @@ TwoWire tw;
 Serial Serial0;
 Serial Serial1;
 ADC adc;
+SPI spi;
 
 Servo m0;
 Servo m1;
