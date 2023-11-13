@@ -36,3 +36,5 @@ public:
 // template<uint pin>
 // bool ADC<pin>::initialized = false;
 // bool ADC::initialized = false;
+
+// static ADC adc;

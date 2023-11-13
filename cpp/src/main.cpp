@@ -20,10 +20,11 @@ enum gpio_function {
 #include "tusb.h" // wait for USB
 
 #include "defs.hpp"
-// #include "gps.hpp"
+#include "fsensors.hpp"
 #include "led.hpp"
-#include "pwm.hpp"
 #include "memory.hpp"
+// #include "picolib/pwm.hpp"
+#include "picolib/picolib.hpp"
 
 #include <gcigps.hpp>
 #include <gciSensors.hpp>
@@ -31,7 +32,7 @@ enum gpio_function {
 #include <squaternion.hpp>
 #include <yivo.hpp>
 
-#include <mavlink.h>
+// #include <mavlink.h>
 
 using namespace std;
 using namespace LSM6DSOX;
@@ -57,18 +58,26 @@ Servo m2;
 Servo m3;
 
 bool callback_100hz(struct repeating_timer *t) {
-  memory.timer100hz.set();
+  // memory.timer100hz.set();
+  memory.timers += TIMER_100HZ;
   return true;
 }
 
+bool callback_50hz(struct repeating_timer *t) {
+  // memory.timer50hz.set();
+  memory.timers += TIMER_50HZ;
+  return true;
+}
 
 bool callback_10hz(struct repeating_timer *t) {
-  memory.timer10hz.set();
+  // memory.timer10hz.set();
+  memory.timers += TIMER_10HZ;
   return true;
 }
 
 bool callback_1hz(struct repeating_timer *t) {
-  memory.timer1hz.set();
+  // memory.timer1hz.set();
+  memory.timers += TIMER_1HZ;
   return true;
 }
 
@@ -79,6 +88,10 @@ int main() {
   while (!tud_cdc_connected()) {
     sleep_ms(100);
   }
+
+  uint8_t chip = rp2040_chip_version();
+  uint8_t rom = rp2040_rom_version();
+  printf(">> Chip Ver: %zu  ROM Ver: %zu\n", chip, rom);
 
   if (watchdog_caused_reboot()) {
     printf("*** Watchdog Rebooted ***\n");
@@ -150,71 +163,33 @@ int main() {
   sleep_ms(100);
 
 
-  mavlink_message_t message;
+  // mavlink_message_t message;
 
-  const uint8_t system_id = 42;
-  const uint8_t base_mode = 0;
-  const uint8_t custom_mode = 0;
-  mavlink_msg_heartbeat_pack_chan(
-    system_id,
-    MAV_COMP_ID_PERIPHERAL,
-    MAVLINK_COMM_0,
-    &message,
-    MAV_TYPE_GENERIC,
-    MAV_AUTOPILOT_GENERIC,
-    base_mode,
-    custom_mode,
-    MAV_STATE_STANDBY);
+  // const uint8_t system_id = 42;
+  // const uint8_t base_mode = 0;
+  // const uint8_t custom_mode = 0;
+  // mavlink_msg_heartbeat_pack_chan(
+  //   system_id,
+  //   MAV_COMP_ID_PERIPHERAL,
+  //   MAVLINK_COMM_0,
+  //   &message,
+  //   MAV_TYPE_GENERIC,
+  //   MAV_AUTOPILOT_GENERIC,
+  //   base_mode,
+  //   custom_mode,
+  //   MAV_STATE_STANDBY);
 
-  uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
-  const int len = mavlink_msg_to_send_buffer(buffer, &message);
+  // uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
+  // const int len = mavlink_msg_to_send_buffer(buffer, &message);
 
   while (1) {
-    if (memory.timer100hz == true) {
-      const LIS3MDL::mag_t m = mag.read_cal();
-      if (m.ok) {
-        printf("mag: %f %f %f\n", m.x, m.y, m.z);
-      }
+    // if (memory.timer100hz == true) handle_ins();
+    // if (memory.timer10hz == true) handle_battery();
+    // if (memory.timer1hz == true) handle_gps();
 
-      sox_t i = imu.read();
-      if (i.ok) {
-        printf("accel: %f %f %f  gyro: %f %f %f\n", i.a.x, i.a.y, i.a.z, i.g.x,
-              i.g.y, i.g.z);
-      }
-
-      memory.status = SET_BITS(memory.status, STATUS_ACCELS|STATUS_GYROS|STATUS_MAGS);
-      // memory.timer100hz = false;
-    }
-
-    if (memory.timer1hz == true) {
-      pt_t pt = bmp.read();
-      if (pt.ok) {
-        printf("press: %f   temp: %f\n", pt.press, pt.temp);
-      }
-
-      bool ok = false;
-      while (Serial1.available()) {
-        char c = (char)Serial1.read();
-        ok = gps.read(c);
-        if (ok) break;
-      }
-
-      if (ok) {
-        gga_t gga;
-        gci::GpsID id = gps.get_id();
-        if (id == gci::GpsID::GGA) {
-          ok = gps.get_msg(gga);
-          if (ok) printf("GGA lat: %f lon: %f\n", gga.lat, gga.lon);
-          else printf("Bad parsing\n");
-        }
-      }
-
-      float batt = adc.read(ADC_BATT_PIN);
-      // printf("battery: %f\n", batt);
-
-      memory.status = SET_BITS(memory.status, STATUS_PRESS|STATUS_TEMP|STATUS_GPS|STATUS_BATTERY);
-      // memory.timer1hz = false;
-    }
+    if (memory.timers.is_set(TIMER_100HZ)) handle_ins();
+    if (memory.timers.is_set(TIMER_10HZ)) handle_battery();
+    if (memory.timers.is_set(TIMER_1HZ)) handle_gps();
 
     watchdog_update();
   }

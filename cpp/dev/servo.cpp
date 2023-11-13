@@ -4,7 +4,7 @@
 #include "tusb.h" // wait for USB
 #include <stdio.h>
 
-#include "pwm.hpp"
+#include "picolib/pwm.hpp"
 
 constexpr uint SERVO_PIN = 16;
 constexpr uint32_t SLEEP = 100;

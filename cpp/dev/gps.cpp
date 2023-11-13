@@ -11,7 +11,7 @@ $PGACK,33,0*6E - no antenna
 #include <stdio.h>
 
 #include "gcigps.hpp"
-#include "uart.hpp"
+#include "picolib/uart.hpp"
 
 Serial Serial1;
 gci::GPS gps;

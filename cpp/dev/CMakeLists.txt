@@ -1,5 +1,6 @@
 list(APPEND examples
     timer
+    timer2
     servo
     servo2
     gps

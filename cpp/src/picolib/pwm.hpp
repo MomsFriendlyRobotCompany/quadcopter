@@ -52,3 +52,9 @@ public:
     pwm_set_chan_level(slice_num, channel, pulse_width_us);
   }
 };
+
+using ESC = Servo; // just an alias ... want to do better esc stuff later
+
+// class ESC: public Servo {
+//   public:
+// };

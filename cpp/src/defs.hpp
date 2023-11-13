@@ -5,9 +5,10 @@
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
 
-#include "adc.hpp"
 #include "gcisensors.hpp"
-#include "uart.hpp"
+// #include "picolib/uart.hpp"
+// #include "picolib/adc.hpp"
+#include "picolib/picolib.hpp"
 
 constexpr uint LED_PIN            = 25;
 constexpr uint ADC_BATT_PIN       = A2;
