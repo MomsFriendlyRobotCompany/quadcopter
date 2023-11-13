@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 
-set(PROJECT pico_simple)
+set(PROJECT quadcopter)
 set(PICO_BOARD pico) # pico or pico_w
 set(PICO_SDK_PATH "$ENV{HOME}/github/pico-sdk")
 set(ENV{PATH} "$ENV{HOME}/github/gcc-arm/bin:$ENV{PATH}")
@@ -118,7 +118,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(
     ${PROJECT_NAME}
         pico_stdlib
-        # pico_multicore
+        pico_multicore
         hardware_exception
         hardware_adc
         hardware_i2c

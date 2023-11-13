@@ -32,3 +32,41 @@ Serial1.begin(baud);
 - `RUN` set `LOW` to reset the uC
 - `VSYS` is the external power input which is probably the USB and ranges between 1.8V-5.5V
 - `VBUS` is power from the USB input, typicall 5V
+
+You can tell `picotool` what some of the pins do:
+
+```c
+enum gpio_function {
+    GPIO_FUNC_XIP = 0,
+    GPIO_FUNC_SPI = 1,
+    GPIO_FUNC_UART = 2,
+    GPIO_FUNC_I2C = 3,
+    GPIO_FUNC_PWM = 4,
+    GPIO_FUNC_SIO = 5,
+    GPIO_FUNC_PIO0 = 6,
+    GPIO_FUNC_PIO1 = 7,
+    GPIO_FUNC_GPCK = 8,
+    GPIO_FUNC_USB = 9,
+    GPIO_FUNC_NULL = 0xf,
+};
+
+// INFO ////////////////////////////////////////////////////////////
+bi_decl(bi_program_description("something"));
+bi_decl(bi_program_version_string("v1"));
+bi_decl(bi_program_url("github"));
+// I2C ------------------------------------------------------------
+bi_decl(bi_2pins_with_func(i2c_sda, i2c_scl, GPIO_FUNC_I2C));
+// UART -----------------------------------------------------------
+bi_decl(bi_2pins_with_func(UART0_RX_PIN, UART0_TX_PIN, GPIO_FUNC_UART));
+bi_decl(bi_2pins_with_func(UART1_RX_PIN, UART1_TX_PIN, GPIO_FUNC_UART));
+// ADC ------------------------------------------------------------
+bi_decl(bi_1pin_with_name(ADC_BATT_PIN, "Battery ADC"));
+// PWM ------------------------------------------------------------
+bi_decl(bi_1pin_with_name(pwm_m0, "PWM M0"));
+bi_decl(bi_1pin_with_name(pwm_m1, "PWM M1"));
+bi_decl(bi_1pin_with_name(pwm_m2, "PWM M2"));
+bi_decl(bi_1pin_with_name(pwm_m3, "PWM M3"));
+// LED ------------------------------------------------------------
+bi_decl(bi_1pin_with_name(LED_PIN, "LED"));
+////////////////////////////////////////////////////////////////////
+```

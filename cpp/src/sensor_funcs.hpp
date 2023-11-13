@@ -41,7 +41,7 @@ void handle_ins() {
     printf("accel: %f %f %f  gyro: %f %f %f\n", i.a.x, i.a.y, i.a.z, i.g.x,
           i.g.y, i.g.z);
 
-    memory.sensors += (STATUS_ACCELS|STATUS_GYROS);
+    memory.sensors += STATUS_AG;
   }
 
   // memory.status = SET_BITS(memory.status, STATUS_ACCELS|STATUS_GYROS|STATUS_MAGS);
@@ -53,14 +53,14 @@ void handle_pt() {
   pt_t pt = bmp.read();
   if (pt.ok) {
     printf("press: %f   temp: %f\n", pt.press, pt.temp);
-    memory.sensors += (STATUS_PRESS|STATUS_TEMP);
+    memory.sensors += STATUS_PT;
   }
   // memory.status = SET_BITS(memory.status, STATUS_PRESS|STATUS_TEMP);
 }
 
 void handle_battery() {
   float batt = adc.read(ADC_BATT_PIN);
-  // printf("battery: %f\n", batt);
+  printf("battery: %f\n", batt);
   memory.sensors += STATUS_BATTERY;
 }
 
@@ -87,4 +87,9 @@ void handle_gps() {
 
   // memory.status = SET_BITS(memory.status, STATUS_GPS);
   // memory.timer1hz = false;
+}
+
+void handle_health() {
+  // send heartbeat msg
+  printf("+ Health +\n");
 }

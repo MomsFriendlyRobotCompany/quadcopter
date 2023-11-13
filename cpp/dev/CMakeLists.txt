@@ -5,6 +5,7 @@ list(APPEND examples
     servo2
     gps
     ext_int
+    multi_core
 )
 
 # message(STATUS "Examples ----------------------")
@@ -14,14 +15,15 @@ foreach(app ${examples})
         ${app}
             PRIVATE
                 pico_stdlib
-                # pico_multicore
+                pico_multicore
                 hardware_exception
                 hardware_adc
                 hardware_i2c
                 hardware_uart
                 hardware_pio
                 hardware_pwm
-                # hardware_spi
+                hardware_spi
+                hardware_rtc
                 ${libs})
     target_include_directories(
         ${app}

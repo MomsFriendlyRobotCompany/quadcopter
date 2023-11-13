@@ -4,6 +4,10 @@
 #include <cstdint>
 #include <cstdio>
 
+/**
+ This is a FIFO, but with a fixed size that will over write old
+ data. It is designed to be simple and fast with low overhead.
+*/
 template <uint16_t BUFFER_SIZE> class Fifo {
   // public:
   uint8_t buffer[BUFFER_SIZE];

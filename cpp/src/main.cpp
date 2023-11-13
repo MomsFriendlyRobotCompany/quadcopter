@@ -1,38 +1,23 @@
-/*
-enum gpio_function {
-    GPIO_FUNC_XIP = 0,
-    GPIO_FUNC_SPI = 1,
-    GPIO_FUNC_UART = 2,
-    GPIO_FUNC_I2C = 3,
-    GPIO_FUNC_PWM = 4,
-    GPIO_FUNC_SIO = 5,
-    GPIO_FUNC_PIO0 = 6,
-    GPIO_FUNC_PIO1 = 7,
-    GPIO_FUNC_GPCK = 8,
-    GPIO_FUNC_USB = 9,
-    GPIO_FUNC_NULL = 0xf,
-};
-*/
+/**/
 
 #include <stdio.h>
 
-#include "hardware/watchdog.h"
+#include "pico/multicore.h" // multicore_launch_core1()
 #include "tusb.h" // wait for USB
 
 #include "defs.hpp"
-#include "fsensors.hpp"
+#include "sensor_funcs.hpp"
 #include "led.hpp"
 #include "memory.hpp"
-// #include "picolib/pwm.hpp"
 #include "picolib/picolib.hpp"
+#include "main_core_1.hpp"
+#include "messaging/mavlink_comm.hpp"
 
 #include <gcigps.hpp>
 #include <gciSensors.hpp>
 #include <messages.hpp>
 #include <squaternion.hpp>
 #include <yivo.hpp>
-
-// #include <mavlink.h>
 
 using namespace std;
 using namespace LSM6DSOX;
@@ -52,6 +37,7 @@ Serial Serial0;
 Serial Serial1;
 ADC adc;
 SPI spi;
+WatchDog wdog; // not sure how useful this is
 
 Servo m0;
 Servo m1;
@@ -59,25 +45,21 @@ Servo m2;
 Servo m3;
 
 bool callback_100hz(struct repeating_timer *t) {
-  // memory.timer100hz.set();
   memory.timers += TIMER_100HZ;
   return true;
 }
 
 bool callback_50hz(struct repeating_timer *t) {
-  // memory.timer50hz.set();
   memory.timers += TIMER_50HZ;
   return true;
 }
 
 bool callback_10hz(struct repeating_timer *t) {
-  // memory.timer10hz.set();
   memory.timers += TIMER_10HZ;
   return true;
 }
 
 bool callback_1hz(struct repeating_timer *t) {
-  // memory.timer1hz.set();
   memory.timers += TIMER_1HZ;
   return true;
 }
@@ -94,11 +76,11 @@ int main() {
   uint8_t rom = rp2040_rom_version();
   printf(">> Chip Ver: %zu  ROM Ver: %zu\n", chip, rom);
 
-  if (watchdog_caused_reboot()) {
+  if (wdog.caused_reboot()) {
     printf("*** Watchdog Rebooted ***\n");
   }
 
-  watchdog_enable(WATCHDOG_RESET, true);
+  wdog.enable(WATCHDOG_RESET);
 
   uint speed = tw.init(i2c_port, I2C_400KHZ, i2c_sda, i2c_scl);
 
@@ -108,7 +90,6 @@ int main() {
   gpio_init(LED_PIN);
   gpio_set_dir(LED_PIN, GPIO_OUT);
 
-  // ADC battery;
   bool ok = adc.init(ADC_BATT_PIN);
   if (ok == false) printf("*** Error ADC battery ***\n");
 
@@ -163,35 +144,16 @@ int main() {
 
   sleep_ms(100);
 
-
-  // mavlink_message_t message;
-
-  // const uint8_t system_id = 42;
-  // const uint8_t base_mode = 0;
-  // const uint8_t custom_mode = 0;
-  // mavlink_msg_heartbeat_pack_chan(
-  //   system_id,
-  //   MAV_COMP_ID_PERIPHERAL,
-  //   MAVLINK_COMM_0,
-  //   &message,
-  //   MAV_TYPE_GENERIC,
-  //   MAV_AUTOPILOT_GENERIC,
-  //   base_mode,
-  //   custom_mode,
-  //   MAV_STATE_STANDBY);
-
-  // uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
-  // const int len = mavlink_msg_to_send_buffer(buffer, &message);
+  multicore_launch_core1(main_core_1);
 
   while (1) {
-    // if (memory.timer100hz == true) handle_ins();
-    // if (memory.timer10hz == true) handle_battery();
-    // if (memory.timer1hz == true) handle_gps();
-
     if (memory.timers.is_set(TIMER_100HZ)) handle_ins();
     if (memory.timers.is_set(TIMER_10HZ)) handle_battery();
-    if (memory.timers.is_set(TIMER_1HZ)) handle_gps();
+    if (memory.timers.is_set(TIMER_1HZ)) {
+      handle_gps();
+      handle_health();
+    }
 
-    watchdog_update();
+    wdog.touch();
   }
 }

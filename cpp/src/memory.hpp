@@ -13,19 +13,28 @@ using gci::sensors::vecf_t;
 constexpr uint32_t TIMER_1HZ = (1 << 0);
 constexpr uint32_t TIMER_5HZ = (1 << 1);
 constexpr uint32_t TIMER_10HZ = (1 << 2);
-constexpr uint32_t TIMER_50HZ = (1 << 3);
-constexpr uint32_t TIMER_100HZ = (1 << 4);
+constexpr uint32_t TIMER_25HZ = (1 << 3);
+constexpr uint32_t TIMER_50HZ = (1 << 4);
+constexpr uint32_t TIMER_100HZ = (1 << 5);
 
 // different sensors
-constexpr uint16_t STATUS_ACCELS = (1 << 1);
-constexpr uint16_t STATUS_GYROS = (1 << 2);
-constexpr uint16_t STATUS_MAGS = (1 << 3);
-constexpr uint16_t STATUS_POS = (1 << 4);
-constexpr uint16_t STATUS_VEL = (1 << 5);
-constexpr uint16_t STATUS_PRESS = (1 << 6);
-constexpr uint16_t STATUS_TEMP = (1 << 7);
-constexpr uint16_t STATUS_GPS = (1 << 8);
-constexpr uint16_t STATUS_BATTERY = (1 << 9);
+// TODO: group sensors that can be read together to reduce bits
+//   accel/gyro
+//   mag(slower is better for heading, rely on gyros for fast est?)
+//   pressure/temperature
+//   pos/vel/attitude (filtered)
+constexpr uint32_t STATUS_AG = (1 << 0); // accel/gyro
+constexpr uint32_t STATUS_PT = (1 << 1); // pressure/temperature
+constexpr uint32_t STATUS_MAGS = (1 << 2);
+constexpr uint32_t STATUS_GPS = (1 << 3);
+constexpr uint32_t STATUS_BATTERY = (1 << 4);
+constexpr uint32_t STATUS_PVA = (1 << 5); // pos/vel/attitude (filtered)
+// constexpr uint16_t STATUS_ACCELS = (1 << 1);
+// constexpr uint16_t STATUS_GYROS = (1 << 2);
+// constexpr uint16_t STATUS_PRESS = (1 << 6);
+// constexpr uint16_t STATUS_TEMP = (1 << 7);
+// constexpr uint16_t STATUS_POS = (1 << 4);
+// constexpr uint16_t STATUS_VEL = (1 << 5);
 
 // constexpr uint16_t SET_BITS(const uint16_t val, const uint16_t mask) { return val | mask; }
 // constexpr uint16_t CLEAR_BITS(const uint16_t val, const uint16_t mask) { return val & ~mask; }
@@ -41,13 +50,6 @@ struct SharedMemory_t {
   float temperature;
   gga_t gps;
   float battery;
-
-  // BoolFlag timer100hz;
-  // BoolFlag timer50hz;
-  // BoolFlag timer10hz;
-  // BoolFlag timer1hz;
-
-  // uint16_t status; // which values
 
   BitFlag timers;
   BitFlag sensors;

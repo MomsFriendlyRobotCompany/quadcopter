@@ -2,11 +2,10 @@
 #pragma once
 
 /*
-This is a flag/trigger that can be set to indicate something,
+This is a flag that can be set to indicate something,
 but when it is read, resets a true value to false. Thus you
 don't have to manually clear the flag.
 */
-// class Trigger {
 class BoolFlag {
   bool value{false}; // volatile?
 
@@ -37,21 +36,25 @@ class BitFlag {
   inline
   void operator += (const uint32_t v) { value |= v; } // set
   inline
-  void operator -= (const uint32_t v) { value & ~v; } // clear
+  void operator -= (const uint32_t v) { value &= ~v; } // clear
+  inline
+  void operator ^= (const uint32_t v) { value ^= ~v; } // toggle
 
   // do I want to clear a true bit on read?
   // - will I check multiple times?
   // - how will I know if I didn't clear somewhere else?
   // bool is_set(const uint32_t v) { return (bool)(value & v); }
   bool is_set(const uint32_t v) {
-    // WARN: only check 1 bit a time, it doesn't know the difference
-    // between b001 and b101 ... bot are true, but one flag is missing.
+    // WARN: only check 1 bit at a time, it doesn't know the difference
+    // between b001 and b101 ... both are true, but one flag is missing.
     if (value & v) {
-      value & ~v; // clear
+      value &= ~v; // clear
       return true;
     }
     return false;
   }
+
+  bool check(const uint32_t v) { return value & v; } // check but don't clear
 
   protected:
   uint32_t value{0};
