@@ -2,6 +2,7 @@
 #pragma once
 
 #include "hardware/spi.h"
+#include "hardware/gpio.h"
 
 constexpr uint32_t SPI_20MHZ = 20000000; // maximum
 constexpr uint32_t SPI_10MHZ = 10000000;

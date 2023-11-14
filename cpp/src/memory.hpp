@@ -7,6 +7,10 @@
 
 #include "flags.hpp"
 
+using namespace LSM6DSOX;
+using namespace BMP390;
+using namespace LIS3MDL;
+// using namespace gci::sensors;
 using gci::sensors::vecf_t;
 
 // different reoccuring timers
@@ -40,20 +44,14 @@ constexpr uint32_t STATUS_PVA = (1 << 5); // pos/vel/attitude (filtered)
 // constexpr uint16_t CLEAR_BITS(const uint16_t val, const uint16_t mask) { return val & ~mask; }
 
 struct SharedMemory_t {
-  vecf_t accels;
-  vecf_t gyros;
-  vecf_t mags;
-  vecf_t pos;
-  vecf_t vel;
-
-  float pressure;
-  float temperature;
+  sox_t imu;
+  mag_t mags;
+  vecf_t pos; // from KF
+  vecf_t vel; // from KF
+  pt_t press_temp;
   gga_t gps;
   float battery;
 
   BitFlag timers;
   BitFlag sensors;
 };
-
-static
-SharedMemory_t memory;

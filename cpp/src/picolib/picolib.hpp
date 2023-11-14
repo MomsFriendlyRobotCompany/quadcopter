@@ -5,6 +5,9 @@ nothing here that is specific to quadcopter.
 #pragma once
 
 #include <cstdint>
+#include "pico/binary_info.h"
+#include "pico/stdlib.h"
+#include "tusb.h" // wait for USB
 
 typedef uint32_t pin_t;
 
@@ -16,3 +19,9 @@ typedef uint32_t pin_t;
 #include "rtc.hpp"
 #include "mutex.hpp"
 #include "watchdog.hpp"
+#include "time.hpp"
+
+static
+void wait_for_usb(uint32_t msec=100) {
+  while (!tud_cdc_connected()) { sleep_ms(msec); }
+}

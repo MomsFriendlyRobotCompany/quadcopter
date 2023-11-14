@@ -4,6 +4,7 @@
 #include "hardware/clocks.h"
 #include "hardware/pwm.h"
 #include "pico/stdlib.h"
+#include "hardware/gpio.h"
 
 // https://github.com/107-systems/107-Arduino-Servo-RP2040/tree/main
 constexpr uint16_t SERVO_MAX_PULSE_WIDTH  = 2000UL;

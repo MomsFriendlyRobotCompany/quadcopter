@@ -4,7 +4,7 @@
 #include "hardware/watchdog.h"
 
 /**
- Not sure how useful this is ...
+ Not sure how useful this is compared to C functions ...
 */
 class WatchDog {
   public:

@@ -6,6 +6,9 @@ list(APPEND examples
     gps
     ext_int
     multi_core
+    press_alt
+    mags
+    accels
 )
 
 # message(STATUS "Examples ----------------------")

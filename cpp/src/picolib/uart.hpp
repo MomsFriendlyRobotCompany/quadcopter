@@ -46,6 +46,7 @@ M,,*IRQ enabled: 0   read: 4
 #include "fifo.hpp"
 #include "hardware/irq.h"
 #include "hardware/uart.h"
+#include "hardware/gpio.h"
 #include <cstdint>
 
 constexpr uint UART0_TX_PIN     = 0;

@@ -2,15 +2,15 @@
 
 #include <stdio.h>
 
+#include "picolib/picolib.hpp"
 #include "pico/multicore.h" // multicore_launch_core1()
-#include "tusb.h" // wait for USB
 
 #include "defs.hpp"
 #include "sensor_funcs.hpp"
 #include "led.hpp"
 #include "memory.hpp"
-#include "picolib/picolib.hpp"
 #include "main_core_1.hpp"
+
 #include "messaging/mavlink_comm.hpp"
 
 #include <gcigps.hpp>
@@ -29,7 +29,6 @@ gci::GPS gps;
 gciLIS3MDL mag;
 gciLSM6DSOX imu;
 gciBMP390 bmp;
-Quaternion q;
 Yivo yivo;
 
 TwoWire tw;
@@ -38,6 +37,10 @@ Serial Serial1;
 ADC adc;
 SPI spi;
 WatchDog wdog; // not sure how useful this is
+
+
+SharedMemory_t memory;
+Mutex sm_mutex;
 
 Servo m0;
 Servo m1;
@@ -66,11 +69,7 @@ bool callback_1hz(struct repeating_timer *t) {
 
 int main() {
   stdio_init_all();
-
-  // wait for USB serial connection
-  while (!tud_cdc_connected()) {
-    sleep_ms(100);
-  }
+  wait_for_usb();
 
   uint8_t chip = rp2040_chip_version();
   uint8_t rom = rp2040_rom_version();
@@ -147,10 +146,10 @@ int main() {
   multicore_launch_core1(main_core_1);
 
   while (1) {
-    if (memory.timers.is_set(TIMER_100HZ)) handle_ins();
+    if (memory.timers.is_set(TIMER_100HZ)) handle_ins_sensors();
     if (memory.timers.is_set(TIMER_10HZ)) handle_battery();
     if (memory.timers.is_set(TIMER_1HZ)) {
-      handle_gps();
+      handle_gps(); // maybe move to core1?
       handle_health();
     }
 

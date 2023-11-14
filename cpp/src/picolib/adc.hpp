@@ -4,6 +4,7 @@
 // #include "pico/stdlib.h"
 // #include "pico/binary_info.h"
 #include "hardware/adc.h"
+#include "hardware/gpio.h"
 
 constexpr uint A0         = 0;
 constexpr uint A1         = 1;

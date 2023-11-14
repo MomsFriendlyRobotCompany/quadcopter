@@ -70,3 +70,23 @@ bi_decl(bi_1pin_with_name(pwm_m3, "PWM M3"));
 bi_decl(bi_1pin_with_name(LED_PIN, "LED"));
 ////////////////////////////////////////////////////////////////////
 ```
+
+## Time
+
+```c
+absolute_time_t get_absolute_time(); // returns absolute_time_t which is struct{uint64_t}
+uint64_t to_us_since_boot(absolute_time_t);
+uint32_t to_ms_since_boot(absolute_time_t);
+```
+
+```c
+uint64_t time_since_boot_us() {
+    absolute_time_t t = get_absolute_time();
+    return to_us_since_boot(t);
+}
+
+uint32_t time_since_boot_ms() {
+    absolute_time_t t = get_absolute_time();
+    return to_ms_since_boot(t);
+}
+```

@@ -23,6 +23,7 @@
 // rtc_get_datetime(&t);
 // datetime_to_str(datetime_str, sizeof(datetime_buf), &t);
 // printf("\r%s      ", datetime_str);
+static
 bool set_rtc(datetime_t& t) {
   rtc_init();
   bool ok = rtc_set_datetime(&t);

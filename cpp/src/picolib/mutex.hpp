@@ -33,13 +33,11 @@ class Mutex {
   void set_timeout(uint32_t msec) { timeout_ms = msec; }
 
   bool acquire() {
-    printf("aqc\n");
     if (timeout_ms > 0) return mutex_enter_timeout_ms(&mutex, timeout_ms);
     mutex_enter_blocking(&mutex);
     return true;
   }
 
   void release() { mutex_exit(&mutex); }
-  // operator bool () { return mutex_is_initialized(&mutex); }
   bool is_ready() { return mutex_is_initialized(&mutex); }
 };

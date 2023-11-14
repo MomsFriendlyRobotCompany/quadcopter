@@ -4,11 +4,12 @@
 #include "hardware/gpio.h"
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
-
-#include "gcisensors.hpp"
-// #include "picolib/uart.hpp"
-// #include "picolib/adc.hpp"
 #include "picolib/picolib.hpp"
+
+#include <gcisensors.hpp>
+
+#define MSG_MAVLINK 1
+#define MSG_YIVO !MSG_MAVLINK
 
 constexpr uint LED_PIN            = 25;
 constexpr uint ADC_BATT_PIN       = A2;

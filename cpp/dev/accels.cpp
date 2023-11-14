@@ -1,0 +1,45 @@
+
+
+#include <stdio.h>
+#include <cmath>
+
+#include "picolib/picolib.hpp"
+
+#include <gcisensors.hpp>
+
+using namespace LSM6DSOX;
+using namespace gci::sensors;
+
+constexpr uint i2c_port = 0;
+constexpr uint i2c_scl  = I2C0_SCL_PIN;
+constexpr uint i2c_sda  = I2C0_SDA_PIN;
+
+int main() {
+  stdio_init_all();
+  wait_for_usb();
+
+  TwoWire tw;
+  uint speed = tw.init(i2c_port, I2C_400KHZ, i2c_sda, i2c_scl);
+  bi_decl(bi_2pins_with_func(i2c_sda, i2c_scl, GPIO_FUNC_I2C));
+  printf(">> i2c instance: %u buad: %u\n", i2c_port, speed);
+  printf(">> i2c SDA: %u SCL: %u\n", i2c_sda, i2c_scl);
+
+  gciLSM6DSOX imu;
+  imu.init_tw(i2c_port);
+  while (true) {
+    uint8_t err = imu.init(ACCEL_RANGE_4_G, GYRO_RANGE_2000_DPS, RATE_104_HZ);
+    if (err == 0) break;
+    printf("*** imu error: %d ***\n", err);
+    sleep_ms(1000);
+  }
+
+  while(1) {
+    sleep_ms(10);
+    sox_t i = imu.read();
+    if (i.ok) {
+      printf("accel: %f %f %f  gyro: %f %f %f\n",
+        i.a.x, i.a.y, i.a.z,
+        i.g.x, i.g.y, i.g.z);
+    }
+  }
+}

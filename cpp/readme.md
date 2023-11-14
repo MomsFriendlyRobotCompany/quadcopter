@@ -5,6 +5,21 @@
     - `picolib`: eventually move to separate library, but turn `pico-sdk` C into C++
 - `c_library_v2`: download `mavlink` version 2 and put it in this folder. **Note** the `.gitignore` doesn't track it, so it is initially **missing**. You might have to rename it
 
+## Timers
+
+| Sensor   | Readings             | Sample Rate Hz  | Timer Hz | Units |
+|----------|----------------------|-----------------|----------|-------|
+| LSM6DSOX | accels/gyros         | 104             | 100      | g/dps
+| LIS3MDL  | mags                 | 154             | 100      | unitless
+| BMP390   | pressure/temperature | ?               | ?        | Pa/C
+| GPS      | lat/lon/alt          | 1               | 1        | deg/deg/m
+| ADC      | Battery              | 1               | 1        | mV
+
+| Function      | States           | Hz | Units |
+|---------------|------------------|----|-------|
+| Kalman Filter | pos/vel/attitude | 10 | m/mps/unitless
+| Message Pub   | all              | 10 | n/a
+
 ## ToDo
 
 - [ ] setup for multi-core
