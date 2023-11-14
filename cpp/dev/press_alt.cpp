@@ -14,16 +14,6 @@ constexpr uint i2c_port = 0;
 constexpr uint i2c_scl  = I2C0_SCL_PIN;
 constexpr uint i2c_sda  = I2C0_SDA_PIN;
 
-// uint64_t time_since_boot_us() {
-//     absolute_time_t t = get_absolute_time();
-//     return to_us_since_boot(t);
-// }
-
-// uint32_t time_since_boot_ms() {
-//     absolute_time_t t = get_absolute_time();
-//     return to_ms_since_boot(t);
-// }
-
 float altitude(const float p) {
   // Probably best not to run here ... very computational.
   // pre compute some of this?

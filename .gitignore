@@ -12,6 +12,10 @@ video_odometry/jupyter/arducam/*.pkl
 old
 
 archive
+MadgwickAHRS*
+other
+
+__pycache__
 
 *.bz2
 *.zip
