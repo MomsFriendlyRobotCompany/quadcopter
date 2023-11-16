@@ -1,13 +1,13 @@
 
+#include "pico/stdlib.h"
 #include <cstdint>
 #include <cstdio>
-#include "pico/stdlib.h"
 // #include "pico/util/queue.h"
 // #include "pico/mutex.h"
-#include "pico/multicore.h"
-#include "tusb.h" // wait for USB
 #include "flags.hpp"
+#include "pico/multicore.h"
 #include "picolib/picolib.hpp"
+#include "tusb.h" // wait for USB
 
 constexpr uint32_t FLAG_VALUE = 16;
 

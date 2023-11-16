@@ -1,7 +1,7 @@
 
 
-#include <stdio.h>
 #include <cmath>
+#include <stdio.h>
 
 #include "picolib/picolib.hpp"
 
@@ -37,16 +37,13 @@ int main() {
     sleep_ms(1000);
   }
 
-  float sm[12]{
-    0.864, 0.0, 0.0, 20.553,
-    0.0, 0.893, 0.0, 16.331,
-    0.0, 0.0, 0.988, 30.067};
+  float sm[12]{0.864, 0.0,    0.0, 20.553, 0.0,   0.893,
+               0.0,   16.331, 0.0, 0.0,    0.988, 30.067};
   mag.set_cal(sm);
 
-
-  while(1) {
+  while (1) {
     sleep_ms(10);
-    bool ok = false;
+    bool ok       = false;
     const mag_t m = mag.read_cal();
     if (m.ok == false) {
       printf("** bad read **\n");

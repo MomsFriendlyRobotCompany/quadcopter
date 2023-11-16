@@ -2,19 +2,19 @@
 
 #include <stdio.h>
 
-#include "picolib/picolib.hpp"
 #include "pico/multicore.h" // multicore_launch_core1()
+#include "picolib/picolib.hpp"
 
 #include "defs.hpp"
-#include "sensor_funcs.hpp"
 #include "led.hpp"
-#include "memory.hpp"
 #include "main_core_1.hpp"
+#include "memory.hpp"
+#include "sensor_funcs.hpp"
 
 #include "messaging/mavlink_comm.hpp"
 
-#include <gcigps.hpp>
 #include <gciSensors.hpp>
+#include <gcigps.hpp>
 #include <messages.hpp>
 #include <squaternion.hpp>
 #include <yivo.hpp>
@@ -37,7 +37,6 @@ Serial Serial1;
 ADC adc;
 SPI spi;
 WatchDog wdog; // not sure how useful this is
-
 
 SharedMemory_t memory;
 Mutex sm_mutex;
@@ -72,7 +71,7 @@ int main() {
   wait_for_usb();
 
   uint8_t chip = rp2040_chip_version();
-  uint8_t rom = rp2040_rom_version();
+  uint8_t rom  = rp2040_rom_version();
   printf(">> Chip Ver: %zu  ROM Ver: %zu\n", chip, rom);
 
   if (wdog.caused_reboot()) {

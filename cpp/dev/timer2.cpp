@@ -4,16 +4,22 @@
 #include "tusb.h" // wait for USB
 #include <stdio.h>
 
-volatile bool led_status = false;
-volatile uint count      = 1;
-const uint LED_PIN       = 25;
+volatile bool led_status  = false;
+volatile uint count       = 1;
+const uint LED_PIN        = 25;
 
-volatile bool timer_1hz = false;
+volatile bool timer_1hz   = false;
 volatile bool timer_100hz = false;
 
 // callbacks set flags for main loop to use
-bool callback_100hz(struct repeating_timer *t) { timer_100hz = true; return true; }
-bool callback_1hz(struct repeating_timer *t) { timer_1hz = true; return true; }
+bool callback_100hz(struct repeating_timer *t) {
+  timer_100hz = true;
+  return true;
+}
+bool callback_1hz(struct repeating_timer *t) {
+  timer_1hz = true;
+  return true;
+}
 
 int main() {
   stdio_init_all();
@@ -43,7 +49,7 @@ int main() {
 
   while (1) {
     if (timer_1hz) {
-      timer_1hz = false; // clear flag
+      timer_1hz  = false; // clear flag
       led_status = !led_status;
       gpio_put(LED_PIN, led_status);
       sleep_ms(20);

@@ -6,8 +6,8 @@
 
 #include <mavlink.h>
 
-#include <gcigps.hpp>
 #include <gciSensors.hpp>
+#include <gcigps.hpp>
 #include <messages.hpp>
 #include <squaternion.hpp>
 #include <yivo.hpp>
@@ -32,7 +32,7 @@ extern Mutex sm_mutex;
 //----------------------------
 
 void handle_ins_sensors() {
-  bool ok = false;
+  bool ok                = false;
   const LIS3MDL::mag_t m = mag.read_cal();
   if (m.ok) {
     memory.mags = m;
@@ -44,7 +44,7 @@ void handle_ins_sensors() {
   if (i.ok) {
     memory.imu = i;
     printf("accel: %f %f %f  gyro: %f %f %f\n", i.a.x, i.a.y, i.a.z, i.g.x,
-          i.g.y, i.g.z);
+           i.g.y, i.g.z);
 
     memory.sensors += STATUS_AG;
   }
@@ -70,7 +70,7 @@ void handle_gps() {
   bool ok = false;
   while (Serial1.available()) {
     char c = (char)Serial1.read();
-    ok = gps.read(c);
+    ok     = gps.read(c);
     if (ok) break;
   }
 

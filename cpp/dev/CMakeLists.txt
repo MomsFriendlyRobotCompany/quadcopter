@@ -9,6 +9,7 @@ list(APPEND examples
     press_alt
     mags
     accels
+    iir_filter
 )
 
 # message(STATUS "Examples ----------------------")

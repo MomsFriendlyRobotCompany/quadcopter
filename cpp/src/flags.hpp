@@ -9,7 +9,7 @@ don't have to manually clear the flag.
 class BoolFlag {
   bool value{false}; // volatile?
 
-  public:
+public:
   BoolFlag() {}
   ~BoolFlag() {}
 
@@ -30,15 +30,12 @@ can be tracked with just one instance. You can only check
 this ONCE and then the bit gets cleared.
 */
 class BitFlag {
-  public:
+public:
   BitFlag() {}
 
-  inline
-  void operator += (const uint32_t v) { value |= v; } // set
-  inline
-  void operator -= (const uint32_t v) { value &= ~v; } // clear
-  inline
-  void operator ^= (const uint32_t v) { value ^= ~v; } // toggle
+  inline void operator+=(const uint32_t v) { value |= v; }  // set
+  inline void operator-=(const uint32_t v) { value &= ~v; } // clear
+  inline void operator^=(const uint32_t v) { value ^= ~v; } // toggle
 
   // do I want to clear a true bit on read?
   // - will I check multiple times?
@@ -56,10 +53,10 @@ class BitFlag {
 
   bool check(const uint32_t v) { return value & v; } // check but don't clear
 
-  protected:
+protected:
   uint32_t value{0};
 };
 
-
-// constexpr uint16_t SET_BITS(const uint16_t val, const uint16_t mask) { return val | mask; }
-// constexpr uint16_t CLEAR_BITS(const uint16_t val, const uint16_t mask) { return val & ~mask; }
+// constexpr uint16_t SET_BITS(const uint16_t val, const uint16_t mask) { return
+// val | mask; } constexpr uint16_t CLEAR_BITS(const uint16_t val, const
+// uint16_t mask) { return val & ~mask; }

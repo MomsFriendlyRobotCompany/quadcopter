@@ -1,7 +1,7 @@
 
 
-#include <stdio.h>
 #include <cmath>
+#include <stdio.h>
 
 #include <gcisensors.hpp>
 
@@ -23,20 +23,19 @@ float altitude(const float p) {
   // https://www.mide.com/air-pressure-at-altitude-calculator
   // const float Tb = 15; // temperature at sea level [C] - doesn't work
   // const float Lb = -0.0098; // lapse rate [C/m] - doesn't work ... pow?
-  constexpr float Tb  = 288.15f;           // temperature at sea level [K]
-  constexpr float Lb  = -0.0065f;          // lapse rate [K/m]
-  constexpr float Pb  = 101325.0f;         // pressure at sea level [Pa]
-  constexpr float R   = 8.31446261815324f; // universal gas const [Nm/(mol K)]
-  constexpr float M   = 0.0289644f; // molar mass of Earth's air [kg/mol]
-  constexpr float g0  = 9.80665f;   // gravitational const [m/s^2]
+  constexpr float Tb    = 288.15f;           // temperature at sea level [K]
+  constexpr float Lb    = -0.0065f;          // lapse rate [K/m]
+  constexpr float Pb    = 101325.0f;         // pressure at sea level [Pa]
+  constexpr float R     = 8.31446261815324f; // universal gas const [Nm/(mol K)]
+  constexpr float M     = 0.0289644f; // molar mass of Earth's air [kg/mol]
+  constexpr float g0    = 9.80665f;   // gravitational const [m/s^2]
 
-  constexpr float exp = -R * Lb / (g0 * M);
-  constexpr float scale  = Tb / Lb;
+  constexpr float exp   = -R * Lb / (g0 * M);
+  constexpr float scale = Tb / Lb;
   constexpr float inv_Pb = 1.0f / Pb;
 
   return scale * (pow(p * inv_Pb, exp) - 1.0);
 }
-
 
 int main() {
   stdio_init_all();
@@ -57,17 +56,17 @@ int main() {
     sleep_ms(1000);
   }
 
-  uint32_t cnt = 1;
+  uint32_t cnt   = 1;
   uint32_t epoch = time_since_boot_ms();
-  float hz = 0.0f;
+  float hz       = 0.0f;
 
   while (1) {
     if (cnt++ % 100 == 0) {
       uint32_t now = time_since_boot_ms();
-      float dt = (float)(now - epoch) / 1000.0f;
-      hz = 100.0f / dt;
-      epoch = now;
-      cnt = 1;
+      float dt     = (float)(now - epoch) / 1000.0f;
+      hz           = 100.0f / dt;
+      epoch        = now;
+      cnt          = 1;
     }
     sleep_ms(40); // 25 hz
 
@@ -79,6 +78,7 @@ int main() {
     }
 
     float alt = altitude(pt.press);
-    printf("hz: %f   press: %f   temp: %f    alt: %f\n", hz, pt.press, pt.temp, alt);
+    printf("hz: %f   press: %f   temp: %f    alt: %f\n", hz, pt.press, pt.temp,
+           alt);
   }
 }

@@ -16,7 +16,6 @@ Core 1:
 - publishing mavlink/yivo messages
 */
 
-
 /*
  Need to setup a timer pool here for publishing
  messages at certain rates:
@@ -40,19 +39,19 @@ void update_ins_solution() {
 }
 
 void main_core_1() {
-  #if defined(MSG_MAVLINK)
+#if defined(MSG_MAVLINK)
   uint8_t buffer[MAVLINK_MAX_PACKET_LEN]; // > 256 ... some big number
-  #else
+#else
   uint8_t buffer[MAVLINK_MAX_PACKET_LEN]; // TODO: figure out how big
-  #endif
+#endif
 
-  #if defined(MSG_MAVLINK)
+#if defined(MSG_MAVLINK)
   mav_heartbeat(buffer);
-  #else
+#else
   yivo_heartbeat();
-  #endif
+#endif
 
-  while(1) {
+  while (1) {
     update_ins_solution();
   }
 }
