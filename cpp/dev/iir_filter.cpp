@@ -42,7 +42,7 @@ int main() {
 
   // Apply the IIR filter
   // iirFilter(input, output, 5, b, a, N);
-  IIRFilter<FILTER_SIZE> iir(b,a);
+  IIRFilter<FILTER_SIZE> iir(b,a,1.0f);
 
   for (int i=0; i<5; ++i) output[i] = iir.update(input[i]);
 
