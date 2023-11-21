@@ -18,9 +18,13 @@ int main() {
   // Initialize the GPIO pin
   gpio_init(EXT_INT_PIN);
   gpio_set_dir(EXT_INT_PIN, GPIO_IN);
+  gpio_pull_up(EXT_INT_PIN);
 
-  gpio_set_irq_enabled_with_callback(EXT_INT_PIN, GPIO_IRQ_EDGE_RISE, true,
-                                     irq_handler);
+  gpio_set_irq_enabled_with_callback(
+    EXT_INT_PIN,
+    GPIO_IRQ_EDGE_RISE,
+    true,
+    irq_handler);
 
   // Wait for interrupts
   while (1) {
