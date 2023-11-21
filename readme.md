@@ -35,6 +35,12 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 - `squaternions`: quaternion math
 - `gecko2`: misc
 
+## Other Quadcopters
+
+- [Arduino Pico](https://github.com/earlephilhower/arduino-pico)
+- [WizFi360-EVB-PICO Quadcopter](https://maker.wiznet.io/ravi_maker/contest/wizfi360-evb-pico-based-smart-phone-controlled-micro-drone-for-stem-education/)
+
+
 ## Other Tools
 
 - [NOAA WMM data](https://www.ncei.noaa.gov/magnetic-model-survey-page?redirect=wmm-coefficients)
@@ -51,7 +57,17 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
         15.25942260585284
         ```
 
-## Resources and Other Projects
+- [ESC Configurator](https://esc-configurator.com)
+
+- [simulator: flightmare](https://flightmare.readthedocs.io/en/latest/getting_started/readme.html)
+
+- [Open source signal analyzer](sigrok.org)
+    - [pulseview github](https://github.com/sigrokproject)
+    - [pico as a signal analyzer](https://github.com/dotcypress/ula)
+    - [uLA](https://forums.raspberrypi.com/viewtopic.php?t=350300)
+
+
+## Resources
 
 - BSD: [PX4 Autopilot](https://github.com/PX4/PX4-Autopilot)
 - BSD: [PX4 Estimation and Control Library (ECL)](https://github.com/PX4/PX4-ECL)
@@ -63,21 +79,8 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 - GPL: [Crazyflie](https://github.com/bitcraze/crazyflie-firmware)
 - GPL: [A Simple and Cool Flight Controller (Pi Pico)](https://github.com/victorhook/asac-fc)
 - GPL: [asac-gui (tk)](https://github.com/victorhook/asac-gcs/tree/main)
-
-- [ESC Configurator](https://esc-configurator.com)
-
-- [simulator: flightmare](https://flightmare.readthedocs.io/en/latest/getting_started/readme.html)
-
-- [Arduino Pico](https://github.com/earlephilhower/arduino-pico)
-
-- [Udacity Quadcopter EKF](https://github.com/Ashutosh-Badave/4.EKF_estimator_for_Drone)
-
 - github: [python computer vision](https://github.com/timmarkhuff/horizon_detector/tree/main) flying plane
-
-- [Open source signal analyzer](sigrok.org)
-    - [pulseview github](https://github.com/sigrokproject)
-    - [pico as a signal analyzer](https://github.com/dotcypress/ula)
-    - [uLA](https://forums.raspberrypi.com/viewtopic.php?t=350300)
+- [Udacity Quadcopter EKF](https://github.com/Ashutosh-Badave/4.EKF_estimator_for_Drone)
 
 # MIT License
 

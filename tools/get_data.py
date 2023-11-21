@@ -24,7 +24,7 @@ info = {
         },
         "gyro": {
             "range": (-2000,2000),
-            "units": "rad/sec",
+            "units": "deg/sec",
             "cal": [-0.00889949, -0.00235061, -0.00475294]
         }
     },
@@ -45,7 +45,8 @@ info = {
             "altitude": "m",
             "hdop": "m"
         }
-    }
+    },
+    "AGMPT": "ax ay az gx gy gz mx my mz  temp press timestamp"
 }
 
 gps = []
