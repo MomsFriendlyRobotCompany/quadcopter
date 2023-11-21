@@ -28,9 +28,9 @@ class kalman_filter:
 class KalmanFilter {
   float P{1.0};  // Initial estimate error
   float F{1.0};  // Assuming constant velocity
-  float x{1.0};
-  float Q;
-  float R;
+  float x{1.0};  // state estimate
+  float Q;       // processes noise
+  float R;       // measurement noise
 
   public:
   KalmanFilter(float q, float r) {
@@ -38,7 +38,7 @@ class KalmanFilter {
     R = r;
   }
 
-  float filter(self,z) {
+  float filter(float z) {
     // Prediction
     float xx = x * F
     float P = P + Q

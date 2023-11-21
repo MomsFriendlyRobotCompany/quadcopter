@@ -4,14 +4,14 @@
 
 #include "pico/multicore.h" // multicore_launch_core1()
 #include "picolib/picolib.hpp"
+#include "messaging/mavlink_comm.hpp"
+#include "ins_nav/ins_nav.hpp"
 
 #include "defs.hpp"
 #include "led.hpp"
 #include "main_core_1.hpp"
 #include "memory.hpp"
 #include "sensor_funcs.hpp"
-
-#include "messaging/mavlink_comm.hpp"
 
 #include <gciSensors.hpp>
 #include <gcigps.hpp>
