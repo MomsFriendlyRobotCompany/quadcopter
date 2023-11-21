@@ -1,8 +1,8 @@
 # Quadcopter
 
-## Arduino
+## Notebooks
 
-misc
+Jupyter notebooks for development
 
 ## Cpp
 
@@ -32,6 +32,8 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 - `gciGps`: gps using serial port
 - `squaternions`: quaternion math
 - `gecko2`: misc
+
+## Other Tools
 
 - [NOAA WMM data](https://www.ncei.noaa.gov/magnetic-model-survey-page?redirect=wmm-coefficients)
 
