@@ -7,7 +7,7 @@
 #include "picolib/pwm.hpp"
 
 constexpr uint SERVO_PIN = 16;
-constexpr uint32_t SLEEP = 100;
+constexpr uint32_t SLEEP = 300;
 
 int main() {
   stdio_init_all();
@@ -24,7 +24,7 @@ int main() {
   printf("CW: ");
 
   while (1) {
-    for (uint16_t us = 1000; us <= 2000; us += 20) {
+    for (uint16_t us = 800; us <= 2200; us += 20) {
       s.write_us(us);
       sleep_ms(SLEEP);
       printf(".");

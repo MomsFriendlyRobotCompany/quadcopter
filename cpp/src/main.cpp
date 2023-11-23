@@ -41,10 +41,11 @@ WatchDog wdog; // not sure how useful this is
 SharedMemory_t memory;
 Mutex sm_mutex;
 
-Servo m0;
-Servo m1;
-Servo m2;
-Servo m3;
+// Servo m0;
+// Servo m1;
+// Servo m2;
+// Servo m3;
+
 
 bool callback_100hz(struct repeating_timer *t) {
   memory.timers += TIMER_100HZ;
@@ -130,13 +131,16 @@ int main() {
   // printf("/-- UART is reset to %u baud --/\n", baud);
 
   // Servo /////////////////////////
-  m0.init(pwm_m0);
-  m1.init(pwm_m1);
-  m2.init(pwm_m2);
-  m3.init(pwm_m3);
+  // m0.init(pwm_m0);
+  // m1.init(pwm_m1);
+  // m2.init(pwm_m2);
+  // m3.init(pwm_m3);
 
+  // accel, gyro
   struct repeating_timer timer_100hz;
   add_repeating_timer_ms(-10, callback_100hz, NULL, &timer_100hz);
+
+  // gps
   struct repeating_timer timer_1hz;
   add_repeating_timer_ms(-1000, callback_1hz, NULL, &timer_1hz);
 
@@ -145,7 +149,10 @@ int main() {
   multicore_launch_core1(main_core_1);
 
   while (1) {
-    if (memory.timers.is_set(TIMER_100HZ)) handle_ins_sensors();
+    if (memory.timers.is_set(TIMER_100HZ)) {
+      handle_ins_sensors();
+      run_nav_filter();
+    }
     if (memory.timers.is_set(TIMER_10HZ)) handle_battery();
     if (memory.timers.is_set(TIMER_1HZ)) {
       handle_gps(); // maybe move to core1?

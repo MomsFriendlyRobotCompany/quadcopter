@@ -8,9 +8,9 @@
 
 #include <gciSensors.hpp>
 #include <gcigps.hpp>
-#include <messages.hpp>
-#include <squaternion.hpp>
-#include <yivo.hpp>
+// #include <messages.hpp>
+// #include <squaternion.hpp>
+// #include <yivo.hpp>
 
 using namespace LSM6DSOX;
 using namespace BMP390;
@@ -32,8 +32,8 @@ extern Mutex sm_mutex;
 //----------------------------
 
 void handle_ins_sensors() {
-  bool ok                = false;
-  const LIS3MDL::mag_t m = mag.read_cal();
+  // bool ok                = false;
+  mag_t m = mag.read_cal();
   if (m.ok) {
     memory.mags = m;
     printf("mag: %f %f %f\n", m.x, m.y, m.z);
@@ -43,15 +43,13 @@ void handle_ins_sensors() {
   sox_t i = imu.read();
   if (i.ok) {
     memory.imu = i;
-    printf("accel: %f %f %f  gyro: %f %f %f\n", i.a.x, i.a.y, i.a.z, i.g.x,
-           i.g.y, i.g.z);
+    printf("accel: %f %f %f  gyro: %f %f %f\n",
+      i.a.x, i.a.y, i.a.z,
+      i.g.x, i.g.y, i.g.z);
 
     memory.sensors += STATUS_AG;
   }
-}
 
-void handle_pt() {
-  bool ok = false;
   pt_t pt = bmp.read();
   if (pt.ok) {
     memory.press_temp = pt;
@@ -59,6 +57,18 @@ void handle_pt() {
     memory.sensors += STATUS_PT;
   }
 }
+
+void run_nav_filter() {}
+
+// void handle_pt() {
+//   bool ok = false;
+//   pt_t pt = bmp.read();
+//   if (pt.ok) {
+//     memory.press_temp = pt;
+//     printf("press: %f   temp: %f\n", pt.press, pt.temp);
+//     memory.sensors += STATUS_PT;
+//   }
+// }
 
 void handle_battery() {
   float batt = adc.read(ADC_BATT_PIN);
@@ -74,18 +84,17 @@ void handle_gps() {
     if (ok) break;
   }
 
-  if (ok) {
-    gga_t gga;
-    gci::GpsID id = gps.get_id();
-    if (id == gci::GpsID::GGA) {
-      ok = gps.get_msg(gga);
-      if (ok) {
-        memory.gps = gga;
-        printf("GGA lat: %f lon: %f\n", gga.lat, gga.lon);
-        memory.sensors += STATUS_GPS;
-      }
-      else printf("Bad parsing\n");
-    }
+  if (ok == false) return;
+
+  gga_t gga;
+  gci::GpsID id = gps.get_id();
+  if (id == gci::GpsID::GGA) {
+    ok = gps.get_msg(gga);
+    if (ok == false) return;
+
+    memory.gps = gga;
+    printf("GGA lat: %f lon: %f\n", gga.lat, gga.lon);
+    memory.sensors += STATUS_GPS;
   }
 }
 
