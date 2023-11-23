@@ -2,6 +2,7 @@
 # MavLink C
 
 - [mavlink c](https://mavlink.io/en/mavgen_c/)
+- github: [c_library_v2](https://github.com/mavlink/c_library_v2
 
 ## 1. Parsing Packets
 
