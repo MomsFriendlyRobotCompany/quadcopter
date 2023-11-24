@@ -74,6 +74,10 @@ bi_decl(bi_1pin_with_name(LED_PIN, "LED"));
 ## Time
 
 ```c
+uint64_t time_us_64(void); // ??
+```
+
+```c
 absolute_time_t get_absolute_time(); // returns absolute_time_t which is struct{uint64_t}
 uint64_t to_us_since_boot(absolute_time_t);
 uint32_t to_ms_since_boot(absolute_time_t);

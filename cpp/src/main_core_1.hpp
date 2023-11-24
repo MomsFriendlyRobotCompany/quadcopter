@@ -39,17 +39,17 @@ void update_ins_solution() {
 }
 
 void main_core_1() {
-#if defined(MSG_MAVLINK)
-  uint8_t buffer[MAVLINK_MAX_PACKET_LEN]; // > 256 ... some big number
-#else
-  uint8_t buffer[MAVLINK_MAX_PACKET_LEN]; // TODO: figure out how big
-#endif
+// #if defined(MSG_MAVLINK)
+//   uint8_t buffer[MAVLINK_MAX_PACKET_LEN]; // > 256 ... some big number
+// #else
+//   uint8_t buffer[MAVLINK_MAX_PACKET_LEN]; // TODO: figure out how big
+// #endif
 
-#if defined(MSG_MAVLINK)
-  mav_heartbeat(buffer);
-#else
-  yivo_heartbeat();
-#endif
+// #if defined(MSG_MAVLINK)
+//   mav_heartbeat(buffer);
+// #else
+//   yivo_heartbeat();
+// #endif
 
   while (1) {
     update_ins_solution();

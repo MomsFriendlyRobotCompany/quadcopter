@@ -70,11 +70,11 @@ FetchContent_Declare(squaternion
 )
 
 # messages -------------
-FetchContent_Declare(messages
-    GIT_REPOSITORY "https://github.com/gecko-robotics/messages.git"
-    GIT_TAG "origin/main"
-    SOURCE_SUBDIR "cpp"
-)
+# FetchContent_Declare(messages
+#     GIT_REPOSITORY "https://github.com/gecko-robotics/messages.git"
+#     GIT_TAG "origin/main"
+#     SOURCE_SUBDIR "cpp"
+# )
 
 # yivo -----------------
 FetchContent_Declare(yivo
@@ -101,7 +101,7 @@ list(APPEND
     libs
         squaternion
         yivo
-        messages
+        # messages
         gcisensors
         gcigps
 )
@@ -113,7 +113,7 @@ add_executable(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME}
-    PRIVATE ${CMAKE_SOURCE_DIR}/c_library_v2/minimal)
+    PRIVATE ${CMAKE_SOURCE_DIR}/../../c_library_v2/)
 
 target_link_libraries(
     ${PROJECT_NAME}

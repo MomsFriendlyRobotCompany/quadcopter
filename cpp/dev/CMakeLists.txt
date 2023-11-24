@@ -1,15 +1,16 @@
 list(APPEND examples
-    timer
-    timer2
+    # timer
+    # timer2
     servo
-    servo2
-    gps
-    ext_int
-    multi_core
-    press_alt
-    mags
-    accels
-    iir_filter
+    usb
+    # servo2
+    # gps
+    # ext_int
+    # multi_core
+    # press_alt
+    # mags
+    # accels
+    # iir_filter
 )
 
 # message(STATUS "Examples ----------------------")

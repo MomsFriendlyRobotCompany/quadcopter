@@ -6,16 +6,16 @@
 #include "picolib/picolib.hpp"
 #include "messaging/mavlink_comm.hpp"
 #include "ins_nav/ins_nav.hpp"
+#include "sensor_funcs.hpp"
 
 #include "defs.hpp"
 #include "led.hpp"
 #include "main_core_1.hpp"
 #include "memory.hpp"
-#include "sensor_funcs.hpp"
 
 #include <gciSensors.hpp>
 #include <gcigps.hpp>
-#include <messages.hpp>
+// #include <messages.hpp>
 #include <squaternion.hpp>
 #include <yivo.hpp>
 
@@ -104,7 +104,7 @@ int main() {
 
   bmp.init_tw(i2c_port);
   while (true) {
-    int err = bmp.init(BMP390::OS_MODE_PRES_16X_TEMP_2X);
+    int err = bmp.init(ODR_100_HZ);
     if (err == 0) break;
     printf("*** bmp error: %d ***\n", err);
     sleep_ms(1000);
@@ -136,7 +136,7 @@ int main() {
   // m2.init(pwm_m2);
   // m3.init(pwm_m3);
 
-  // accel, gyro
+  // accel, gyro, mag, press
   struct repeating_timer timer_100hz;
   add_repeating_timer_ms(-10, callback_100hz, NULL, &timer_100hz);
 

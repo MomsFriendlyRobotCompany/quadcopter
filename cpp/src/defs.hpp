@@ -8,8 +8,8 @@
 
 #include <gcisensors.hpp>
 
-#define MSG_MAVLINK 1
-#define MSG_YIVO !MSG_MAVLINK
+// #define MSG_MAVLINK 1
+// #define MSG_YIVO !MSG_MAVLINK
 
 constexpr uint LED_PIN            = 25;
 constexpr uint ADC_BATT_PIN       = A2;

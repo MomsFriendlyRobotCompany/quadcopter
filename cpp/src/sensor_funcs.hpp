@@ -4,13 +4,13 @@
 #include "memory.hpp"
 #include "picolib/picolib.hpp"
 
-#include <mavlink.h>
+// #include <mavlink.h>
 
 #include <gciSensors.hpp>
 #include <gcigps.hpp>
 // #include <messages.hpp>
 // #include <squaternion.hpp>
-// #include <yivo.hpp>
+#include "messaging/yivo_comm.hpp"
 
 using namespace LSM6DSOX;
 using namespace BMP390;
@@ -22,7 +22,6 @@ extern gci::GPS gps;
 extern gciLIS3MDL mag;
 extern gciLSM6DSOX imu;
 extern gciBMP390 bmp;
-extern Yivo yivo;
 extern Serial Serial0;
 extern Serial Serial1;
 extern ADC adc;
@@ -60,15 +59,15 @@ void handle_ins_sensors() {
 
 void run_nav_filter() {}
 
-// void handle_pt() {
-//   bool ok = false;
-//   pt_t pt = bmp.read();
-//   if (pt.ok) {
-//     memory.press_temp = pt;
-//     printf("press: %f   temp: %f\n", pt.press, pt.temp);
-//     memory.sensors += STATUS_PT;
-//   }
-// }
+void handle_pt() {
+  bool ok = false;
+  pt_t pt = bmp.read();
+  if (pt.ok) {
+    memory.press_temp = pt;
+    printf("press: %f   temp: %f\n", pt.press, pt.temp);
+    memory.sensors += STATUS_PT;
+  }
+}
 
 void handle_battery() {
   float batt = adc.read(ADC_BATT_PIN);

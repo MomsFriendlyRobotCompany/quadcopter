@@ -49,6 +49,7 @@ struct SharedMemory_t {
   mag_t mags;
   vecf_t pos; // from KF
   vecf_t vel; // from KF
+  Quaternion q; // from KF
   pt_t press_temp;
   gga_t gps;
   float battery;

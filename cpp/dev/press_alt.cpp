@@ -50,7 +50,7 @@ int main() {
   gciBMP390 bmp;
   bmp.init_tw(i2c_port);
   while (true) {
-    int err = bmp.init(BMP390::OS_MODE_PRES_16X_TEMP_2X); // 25 hz
+    int err = bmp.init(ODR_100_HZ); // 25 hz
     if (err == 0) break;
     printf("*** bmp error: %d ***\n", err);
     sleep_ms(1000);
