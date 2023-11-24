@@ -1,10 +1,12 @@
 list(APPEND examples
     # timer
     # timer2
-    servo
+    ultrasound
+    # ultrasoundpio # doesn't work
     usb
-    # servo2
-    # gps
+    # servopio
+    servo
+    gps
     # ext_int
     # multi_core
     # press_alt
@@ -35,6 +37,14 @@ foreach(app ${examples})
         PRIVATE
         ../src
     )
+
+    if (${app} STREQUAL "servopio")
+    pico_generate_pio_header(${app} ${CMAKE_CURRENT_LIST_DIR}/pico_servo.pio)
+    endif()
+
+    # if (${app} STREQUAL "ultrasoundpio")
+    # pico_generate_pio_header(${app} ${CMAKE_CURRENT_LIST_DIR}/pico_sr04.pio) # broke
+    # endif()
 
     # create uf2 output --------------------------------------------------
     pico_add_extra_outputs(${app})

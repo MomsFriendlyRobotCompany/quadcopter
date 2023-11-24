@@ -7,7 +7,6 @@
 #include "picolib/pwm.hpp"
 
 constexpr uint SERVO_PIN = 16;
-constexpr uint32_t SLEEP = 300;
 
 int main() {
   stdio_init_all();
@@ -21,24 +20,15 @@ int main() {
   s.init(SERVO_PIN);
   bi_decl(bi_1pin_with_name(SERVO_PIN, "Servo pin"));
 
-  printf("CW: ");
-
+  bool dir = true;
+  uint16_t us = 0;
   while (1) {
-    for (uint16_t us = 800; us <= 2200; us += 20) {
-      s.write_us(us);
-      sleep_ms(SLEEP);
-      printf(".");
-    }
-
-    printf("\nCCW:");
-
-    for (uint16_t us = 2000; us >= 1000; us -= 20) {
-      s.write_us(us);
-      sleep_ms(SLEEP);
-      printf(".");
-    }
-
-    printf("\nCW: ");
+    if (us > 3500) dir = false;
+    if (us < 10) dir = true;
+    us += (dir) ? 50 : -50;
+    s.write_us(us);
+    sleep_ms(10);
+    // printf(".");
   }
 
   return 0;
