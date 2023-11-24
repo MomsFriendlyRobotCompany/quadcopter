@@ -177,7 +177,3 @@ public:
     uart_write_blocking(uart, data, size);
   }
 };
-
-
-// static Serial Serial0;
-// static Serial Serial1;

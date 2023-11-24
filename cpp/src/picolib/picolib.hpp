@@ -20,6 +20,7 @@ typedef uint32_t pin_t;
 #include "mutex.hpp"
 #include "watchdog.hpp"
 #include "time.hpp"
+#include "usb.hpp"
 
 static
 void wait_for_usb(uint32_t msec=100) {
