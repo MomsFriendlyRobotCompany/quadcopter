@@ -11,19 +11,19 @@
 // #define MSG_MAVLINK 1
 // #define MSG_YIVO !MSG_MAVLINK
 
-constexpr uint LED_PIN            = 25;
-constexpr uint ADC_BATT_PIN       = A2;
+constexpr uint32_t LED_PIN            = 25;
+constexpr uint32_t ADC_BATT_PIN       = A2;
 
 constexpr uint32_t WATCHDOG_RESET = 4000; // up to 8.3 sec
 
-constexpr uint pwm_m0             = 16; // 20
-constexpr uint pwm_m1             = 21;
-constexpr uint pwm_m2             = 22;
-constexpr uint pwm_m3             = 23;
+constexpr uint32_t PWM_M0             = 20;
+constexpr uint32_t PWM_M1             = 21;
+constexpr uint32_t PWM_M2             = 22;
+constexpr uint32_t PWM_M3             = 23;
 
-constexpr uint i2c_port           = 0;
-constexpr uint i2c_scl            = I2C0_SCL_PIN;
-constexpr uint i2c_sda            = I2C0_SDA_PIN;
+constexpr uint32_t I2C_PORT           = 0;
+constexpr uint32_t i2c_scl            = I2C0_SCL_PIN;
+constexpr uint32_t i2c_sda            = I2C0_SDA_PIN;
 
 // INFO ////////////////////////////////////////////////////////////
 bi_decl(bi_program_description("something"));
@@ -37,10 +37,10 @@ bi_decl(bi_2pins_with_func(UART1_RX_PIN, UART1_TX_PIN, GPIO_FUNC_UART));
 // ADC ------------------------------------------------------------
 bi_decl(bi_1pin_with_name(ADC_BATT_PIN, "Battery ADC"));
 // PWM ------------------------------------------------------------
-bi_decl(bi_1pin_with_name(pwm_m0, "PWM M0"));
-bi_decl(bi_1pin_with_name(pwm_m1, "PWM M1"));
-bi_decl(bi_1pin_with_name(pwm_m2, "PWM M2"));
-bi_decl(bi_1pin_with_name(pwm_m3, "PWM M3"));
+bi_decl(bi_1pin_with_name(PWM_M0, "PWM M0"));
+bi_decl(bi_1pin_with_name(PWM_M1, "PWM M1"));
+bi_decl(bi_1pin_with_name(PWM_M2, "PWM M2"));
+bi_decl(bi_1pin_with_name(PWM_M3, "PWM M3"));
 // LED ------------------------------------------------------------
 bi_decl(bi_1pin_with_name(LED_PIN, "LED"));
 ////////////////////////////////////////////////////////////////////

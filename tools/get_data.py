@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 from serial import Serial
 from serial.tools.list_ports import comports, grep
-# from struct import Struct # decode serial buffer bytes
-from gecko_messages import *
-import sys                # command line args
+from messages import *
 from the_collector import Collector
 from yivo import Yivo
-from yivo import make_Struct
+from yivo import MsgInfo
+from yivo import Errors as YErrs
+from colorama import Fore
 import time
+import sys  # command line args and exit
 
 cmdline = ""
 if len(sys.argv) == 2:
@@ -69,10 +70,16 @@ class Hertz:
 
 
 def main():
-    msgdb = {
-        Msg.SATNAV: (make_Struct("4f2B3B3B"), gps_t),
-        Msg.IMU_AGMPT: (make_Struct("11fI"), imu_agmtp_t)
-    }
+    msgs = [
+        imu_t,
+        pose_t,
+        gps_t
+    ]
+    msgdb = MsgInfo()
+    for msg in msgs:
+        fmt,_,cls,msgid = msg.__yivo__(0)
+        print(fmt, cls, msgid)
+        msgdb[msgid] = (fmt, cls)
 
     yivo = Yivo(msgdb)
 
@@ -88,15 +95,25 @@ def main():
     print(port)
 
     # port = "/dev/cu.usbmodem14501"
+    # ser = Serial(port, 1000000, timeout=0.001)
     ser = Serial(port, 1000000)
+    if not ser.is_open:
+        print(f"{Fore.RED}*** Failed to open: {port} ***{Fore.RESET}")
+        sys.exit(1)
 
     try:
         while True:
-            c = ser.read(1)
-            ok,this_id,msg = yivo.parse(c)
-            if ok:
+            this_id = 0
+            while this_id == 0:
+                c = ser.read(1)
+                # print(">> ", c)
+                if(len(c) > 0):
+                    this_id = yivo.parse(c)
+
+            err, msg = yivo.unpack()
+            if err == 0:
                 print(msg)
-                if this_id == Msg.IMU_AGMPT:
+                if this_id == Msg.IMU:
                     imuhz.touch()
                     imu.append(msg.serialize())
                 elif this_id == Msg.SATNAV:
@@ -104,8 +121,10 @@ def main():
                     gps.append(msg.serialize())
 
                 # print("\x1Bc\n")
-                print(f">> IMU: {imuhz.hertz():7.1f} Hz", end="\n")
-                print(f">> GPS: {gpshz.hertz():7.1f} Hz", end="\r")
+                # print(f">> IMU: {imuhz.hertz():7.1f} Hz", end="\n")
+                # print(f">> GPS: {gpshz.hertz():7.1f} Hz", end="\r")
+            else:
+                print(f"{Fore.RED}*** {Msg.str(this_id)} has error: {YErrs.str(err)} ***{Fore.RESET}")
 
     except KeyboardInterrupt:
         print("\nctrl-c")
@@ -114,14 +133,14 @@ def main():
     finally:
         ser.close()
 
-    if 1:
+    if 0:
         data = {
             "imu": imu,
             "gps": gps
         }
         print(f">> IMU: {len(imu)} GPS: {len(gps)} data points")
         col = Collector()
-        col.timestamp = True
+        col.timestamp = False
         fname = cmdline
         col.write(fname, data, info)
 

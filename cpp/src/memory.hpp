@@ -45,12 +45,12 @@ constexpr uint32_t STATUS_PVA     = (1 << 5); // pos/vel/attitude (filtered)
 // uint16_t mask) { return val & ~mask; }
 
 struct SharedMemory_t {
-  sox_t imu;
-  mag_t mags;
+  lsm6dsox_t imu;
+  lis3mdl_t mags;
+  bmp390_t press_temp;
   vecf_t pos; // from KF
   vecf_t vel; // from KF
   Quaternion q; // from KF
-  pt_t press_temp;
   gga_t gps;
   float battery;
 

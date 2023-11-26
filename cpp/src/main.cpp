@@ -15,7 +15,6 @@
 
 #include <gciSensors.hpp>
 #include <gcigps.hpp>
-// #include <messages.hpp>
 #include <squaternion.hpp>
 #include <yivo.hpp>
 
@@ -41,10 +40,10 @@ WatchDog wdog; // not sure how useful this is
 SharedMemory_t memory;
 Mutex sm_mutex;
 
-// Servo m0;
-// Servo m1;
-// Servo m2;
-// Servo m3;
+Servo m0;
+Servo m1;
+Servo m2;
+Servo m3;
 
 
 bool callback_100hz(struct repeating_timer *t) {
@@ -81,9 +80,9 @@ int main() {
 
   wdog.enable(WATCHDOG_RESET);
 
-  uint speed = tw.init(i2c_port, I2C_400KHZ, i2c_sda, i2c_scl);
+  uint speed = tw.init(I2C_PORT, I2C_400KHZ, i2c_sda, i2c_scl);
 
-  printf(">> i2c instance: %u buad: %u\n", i2c_port, speed);
+  printf(">> i2c instance: %u buad: %u\n", I2C_PORT, speed);
   printf(">> i2c SDA: %u SCL: %u\n", i2c_sda, i2c_scl);
 
   gpio_init(LED_PIN);
@@ -94,7 +93,6 @@ int main() {
 
   Serial0.init(115200, 0, UART0_TX_PIN, UART0_RX_PIN);
 
-  imu.init_tw(i2c_port);
   while (true) {
     uint8_t err = imu.init(ACCEL_RANGE_4_G, GYRO_RANGE_2000_DPS, RATE_104_HZ);
     if (err == 0) break;
@@ -102,15 +100,15 @@ int main() {
     sleep_ms(1000);
   }
 
-  bmp.init_tw(i2c_port);
   while (true) {
-    int err = bmp.init(ODR_100_HZ);
+    int err = bmp.init(
+      ODR_100_HZ,
+      IIR_FILTER_COEFF_7);
     if (err == 0) break;
     printf("*** bmp error: %d ***\n", err);
     sleep_ms(1000);
   }
 
-  mag.init_tw(i2c_port);
   while (true) {
     int err = mag.init(RANGE_4GAUSS, ODR_155HZ);
     if (err == 0) break;
@@ -131,10 +129,10 @@ int main() {
   // printf("/-- UART is reset to %u baud --/\n", baud);
 
   // Servo /////////////////////////
-  // m0.init(pwm_m0);
-  // m1.init(pwm_m1);
-  // m2.init(pwm_m2);
-  // m3.init(pwm_m3);
+  // m0.init(PWM_M0);
+  // m1.init(PWM_M1);
+  // m2.init(PWM_M2);
+  // m3.init(PWM_M3);
 
   // accel, gyro, mag, press
   struct repeating_timer timer_100hz;
