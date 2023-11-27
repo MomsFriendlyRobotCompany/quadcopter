@@ -8,7 +8,8 @@ from yivo import MsgInfo
 from yivo import Errors as YErrs
 from colorama import Fore
 import time
-import sys  # command line args and exit
+import sys  # command line args and exit and traceback info
+import traceback
 
 cmdline = ""
 if len(sys.argv) == 2:
@@ -107,8 +108,8 @@ def main():
             while this_id == 0:
                 c = ser.read(1)
                 # print(">> ", c)
-                if(len(c) > 0):
-                    this_id = yivo.parse(c)
+                # if(len(c) > 0):
+                this_id = yivo.parse(c)
 
             err, msg = yivo.unpack()
             if err == 0:
@@ -125,11 +126,15 @@ def main():
                 # print(f">> GPS: {gpshz.hertz():7.1f} Hz", end="\r")
             else:
                 print(f"{Fore.RED}*** {Msg.str(this_id)} has error: {YErrs.str(err)} ***{Fore.RESET}")
+                # yivo.dump(msg)
 
     except KeyboardInterrupt:
         print("\nctrl-c")
     except Exception as e:
-        print(f"\n{e}\nSomething happened ...")
+        print(f"{Fore.RED}{traceback.format_exc()}{Fore.RESET}")
+        # or
+        print(f"{Fore.BLUE}{sys.exc_info()[2]}{Fore.RESET}")
+        print(f"\nSomething happened ...")
     finally:
         ser.close()
 

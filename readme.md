@@ -43,6 +43,9 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 
 ## Other Tools
 
+- Sensors
+    - [Adafruit VL53L1X Time of Flight Senosr, 30-4000mm](https://www.adafruit.com/product/3967)
+
 - [NOAA WMM data](https://www.ncei.noaa.gov/magnetic-model-survey-page?redirect=wmm-coefficients)
 
 - python:
@@ -81,6 +84,9 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 - GPL: [asac-gui (tk)](https://github.com/victorhook/asac-gcs/tree/main)
 - github: [python computer vision](https://github.com/timmarkhuff/horizon_detector/tree/main) flying plane
 - [Udacity Quadcopter EKF](https://github.com/Ashutosh-Badave/4.EKF_estimator_for_Drone)
+
+- [raspicam_node](https://github.com/UbiquityRobotics/raspicam_node/tree/kinetic)
+- [fiducial slam](https://github.com/UbiquityRobotics/fiducials/tree/noetic-devel)
 
 # MIT License
 
