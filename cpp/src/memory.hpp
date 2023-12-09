@@ -54,6 +54,10 @@ struct SharedMemory_t {
   gga_t gps;
   float battery;
 
+  // int32_t timer_100HZ_ms{-10};
+  // int32_t timer_10HZ_ms{0};
+  // int32_t timer_1HZ_ms{-1000};
+
   BitFlag timers;
   BitFlag sensors;
 };

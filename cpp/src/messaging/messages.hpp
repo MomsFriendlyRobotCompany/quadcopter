@@ -11,6 +11,10 @@ constexpr uint8_t MSG_CALIBRATION = 13;
 constexpr uint8_t MSG_IMU = 14;
 constexpr uint8_t MSG_GPS = 15;
 constexpr uint8_t MSG_POSE = 16;
+constexpr uint8_t MSG_SHUTDOWN = 17;
+constexpr uint8_t MSG_INTERVAL = 18;
+constexpr uint8_t MSG_ACK = 19;
+
 
 struct __attribute__((packed)) heartbeat_t {
   enum Status: uint8_t {
@@ -66,3 +70,32 @@ struct __attribute__((packed)) pose_t {
   quat_t q;
   // uint32_t timestamp;
 };
+
+// struct __attribute__((packed)) preflight_sensor_offsets {
+//   float cals[12]; // skew and bias
+// };
+
+// stream data to GC
+struct __attribute__((packed)) preflight_calibration {
+  enum Sensor: uint16_t {ACCELS=1, GYROS=2, MAGS=4, ESC=8};
+  float cals[12]{0}; // skew and bias
+  uint16_t sensor{0};
+  uint8_t calibrate{0}; // 0=off, 1=on
+};
+
+struct __attribute__((packed)) preflight_reboot_shutdown {
+  enum Command: uint8_t {REBOOT=1, SHUTDOWN=8};
+  uint8_t command;
+};
+
+struct __attribute__((packed)) message_interval {
+  uint8_t message_id; // message id number
+  int32_t interval_us; // -1=disabled, 0=off, >0 intervalue in usec
+};
+
+struct __attribute__((packed)) message_ack {
+  uint8_t message_id; // message id number
+  int32_t status; // 0=ok, >0 for an error, message specific
+};
+
+

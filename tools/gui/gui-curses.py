@@ -16,10 +16,13 @@
 from time import sleep
 import curses as crs
 from serial import Serial
+from serial.tools.list_ports import comports, grep
 # import sys, select
 from yivo import Yivo
-from yivo.packet import Motors4
+# from yivo.packet import Motors4
+from ..messages import *
 from squaternion import Quaternion
+from colorama import Fore
 
 scrx = 0
 scry = 0
@@ -134,11 +137,18 @@ def keypress(stdscr, c, ser):
 
 def main(stdscr):
 
-    ser = Serial()
-    ser.port = "/dev/tty.usbmodem14601"
-    ser.baud = 1
-    ser.timeout = 0.1
-    ser.open()
+    ports = comports()
+    port = None
+    for p in ports:
+        if "usbmodem" in p.device:
+            port = p.device
+            break
+    print(port)
+
+    ser = Serial(port, 1000000, timeout=0.1)
+    if not ser.is_open:
+        print(f"{Fore.RED}*** Failed to open: {port} ***{Fore.RESET}")
+        sys.exit(1)
 
     yivo = Yivo()
 

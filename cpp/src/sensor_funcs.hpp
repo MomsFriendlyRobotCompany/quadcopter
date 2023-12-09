@@ -74,9 +74,7 @@ void handle_ins_sensors() {
 
   msg.timestamp = time_since_boot_ms();
 
-  yivopkt_t y;
-  y.pack(MSG_IMU, (uint8_t*)&msg, sizeof(msg));
-  write_stdout(y.data(), y.size());
+  yivo_imu(msg);
 }
 
 void run_nav_filter() {}
@@ -111,9 +109,8 @@ void handle_gps() {
     msg.lat = gga.lat;
     msg.lon = gga.lon;
     msg.alt = 0.0f;
-    yivopkt_t y;
-    y.pack(MSG_GPS, (uint8_t*)&msg, sizeof(msg));
-    write_stdout(y.data(), y.size());
+
+    yivo_gps(msg);
   }
 }
 
@@ -121,7 +118,6 @@ void handle_health() {
   // send heartbeat msg
   // printf("+ Health +\n");
   heartbeat_t msg {time_since_boot_ms(), 0};
-  yivopkt_t y;
-  y.pack(MSG_HEARTBEAT, (uint8_t*)&msg, sizeof(msg));
-  write_stdout(y.data(), y.size());
+
+  yivo_heartbeat(msg);
 }

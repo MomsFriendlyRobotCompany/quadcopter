@@ -27,7 +27,11 @@ public:
 /*
 Another flag, but uses bits instead of a bool, so 32 flags
 can be tracked with just one instance. You can only check
-this ONCE and then the bit gets cleared.
+this ONCE and then the bit gets cleared using is_set().
+
+Alternatively, you can use check to to see if a flag multiple
+times safely. However, you must now use clear() or is_set()
+to clear the flag.
 */
 class BitFlag {
 public:
@@ -44,14 +48,19 @@ public:
   bool is_set(const uint32_t v) {
     // WARN: only check 1 bit at a time, it doesn't know the difference
     // between b001 and b101 ... both are true, but one flag is missing.
-    if (value & v) {
-      value &= ~v; // clear
+    // if (value & v) {
+      // value &= ~v; // clear
+    if (check(v)) {
+      clear(v);
       return true;
     }
     return false;
   }
 
+  inline
   bool check(const uint32_t v) { return value & v; } // check but don't clear
+  inline
+  void clear(const uint32_t v) { value &= ~v; }
 
 protected:
   uint32_t value{0};

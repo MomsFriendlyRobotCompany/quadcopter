@@ -151,7 +151,9 @@ int main() {
       handle_ins_sensors();
       run_nav_filter();
     }
-    if (memory.timers.is_set(TIMER_10HZ)) handle_battery();
+    if (memory.timers.is_set(TIMER_10HZ)) {
+      handle_battery();
+    }
     if (memory.timers.is_set(TIMER_1HZ)) {
       handle_gps(); // maybe move to core1?
       handle_health();
