@@ -60,6 +60,7 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
         15.25942260585284
         ```
 
+- [Pico DShot]((https://github.com/cadouthat/pico-dshot) using PIO
 - [ESC Configurator](https://esc-configurator.com)
 
 - [simulator: flightmare](https://flightmare.readthedocs.io/en/latest/getting_started/readme.html)
