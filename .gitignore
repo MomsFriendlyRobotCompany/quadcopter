@@ -22,3 +22,5 @@ __pycache__
 *.log
 
 c_library_v*
+
+secrets.cmake

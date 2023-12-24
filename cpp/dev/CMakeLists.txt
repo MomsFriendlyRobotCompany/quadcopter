@@ -1,18 +1,32 @@
+# set(WIFI_SSID "test" CACHE INTERNAL "secret")
+# set(WIFI_PASSWORD "test" CACHE INTERNAL "secret")
+
+if (PICO_CYW43_SUPPORTED) # set by PICO_BOARD=pico_w
+    if (NOT TARGET pico_cyw43_arch)
+        message("Skipping Pico W examples as support is not available")
+    else()
+        message("Pico W good")
+    endif()
+endif()
+
+include(secrets.cmake)
+
 list(APPEND examples
-    # timer
+    timer
     # timer2
-    ultrasound
+    # ultrasound
     # ultrasoundpio # doesn't work
-    usb
+    # usb
     # servopio
-    servo
-    gps
+    # servo
+    # gps
     # ext_int
     # multi_core
     # press_alt
     # mags
     # accels
     # iir_filter
+    udp
 )
 
 # message(STATUS "Examples ----------------------")
@@ -31,12 +45,27 @@ foreach(app ${examples})
                 hardware_pwm
                 hardware_spi
                 hardware_rtc
+                pico_cyw43_arch_lwip_threadsafe_background
                 ${libs})
+
     target_include_directories(
         ${app}
         PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}
         ../src
     )
+
+    if (${app} STREQUAL "udp")
+        target_link_libraries(
+            ${app}
+                PRIVATE
+                    pico_cyw43_arch_lwip_threadsafe_background)
+
+        target_compile_definitions(${app} PRIVATE
+            WIFI_SSID=\"${WIFI_SSID}\"
+            WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+            )
+    endif()
 
     if (${app} STREQUAL "servopio")
     pico_generate_pio_header(${app} ${CMAKE_CURRENT_LIST_DIR}/pico_servo.pio)
