@@ -28,7 +28,7 @@ gci::GPS gps;
 gciLIS3MDL mag;
 gciLSM6DSOX imu;
 gciBMP390 bmp;
-Yivo yivo;
+// yivo::Parser yivo;
 
 TwoWire tw;
 Serial Serial0;
