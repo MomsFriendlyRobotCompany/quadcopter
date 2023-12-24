@@ -9,21 +9,21 @@
 
 static
 void yivo_heartbeat(const heartbeat_t& msg) {
-  yivopkt_t y;
+  yivo::yivopkt_t y;
   y.pack(MSG_HEARTBEAT, (uint8_t*)&msg, sizeof(msg));
   write_stdout(y.data(), y.size());
 }
 
 static
 void yivo_imu(const imu_agmpt_t& msg) {
-  yivopkt_t y;
+  yivo::yivopkt_t y;
   y.pack(MSG_IMU, (uint8_t*)&msg, sizeof(msg));
   write_stdout(y.data(), y.size());
 }
 
 static
 void yivo_gps(const satnav_t& msg) {
-  yivopkt_t y;
+  yivo::yivopkt_t y;
   y.pack(MSG_GPS, (uint8_t*)&msg, sizeof(msg));
   write_stdout(y.data(), y.size());
 }
@@ -33,7 +33,7 @@ constexpr uint8_t buffer_size = 64;
 static
 void get_inputs() {
   uint8_t buffer[buffer_size];
-  Yivo yivo;
+  yivo::Parser yivo;
   uint32_t num = 0;
   while (num != PICO_ERROR_TIMEOUT) {
     uint8_t id = 0;
@@ -45,7 +45,7 @@ void get_inputs() {
     }
 
     if (id > 0) {
-      yivopkt_t p;
+      yivo::yivopkt_t p;
       yivo.get_packet(p);
 
       if (id == MSG_CALIBRATION) {}
