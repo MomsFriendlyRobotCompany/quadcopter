@@ -40,11 +40,12 @@ Developing ways to use docker on a Raspberry Pi for containerizing flight softwa
 - [Arduino Pico](https://github.com/earlephilhower/arduino-pico)
 - [WizFi360-EVB-PICO Quadcopter](https://maker.wiznet.io/ravi_maker/contest/wizfi360-evb-pico-based-smart-phone-controlled-micro-drone-for-stem-education/)
 
-
 ## Other Tools
 
 - Sensors
-    - [Adafruit VL53L1X Time of Flight Senosr, 30-4000mm](https://www.adafruit.com/product/3967)
+    - [Adafruit VL53L1X Time of Flight Senosr, 30-4000mm](https://www.adafruit.com/product/3967) for $15, but ONLY works indoors (sun light washes out signal)
+    - [Pololu Drivers](https://github.com/pololu/vl53l1x-arduino/tree/master) are much smaller and simplier than Adafruit's drivers
+    - Alternative (also cheaper) is to use ultrasonics which would work both indoors and outdoors
 
 - [NOAA WMM data](https://www.ncei.noaa.gov/magnetic-model-survey-page?redirect=wmm-coefficients)
 
