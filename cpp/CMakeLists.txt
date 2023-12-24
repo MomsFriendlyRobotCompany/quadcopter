@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 
 set(PROJECT quadcopter)
-set(PICO_BOARD pico) # pico or pico_w
+# set(PICO_BOARD pico) # pico or pico_w
+set(PICO_BOARD pico_w)
 set(PICO_SDK_PATH "$ENV{HOME}/github/pico-sdk")
 set(ENV{PATH} "$ENV{HOME}/github/gcc-arm/bin:$ENV{PATH}")
 set(PICO_SDK_PATH "${PICO_SDK_PATH}" CACHE PATH "Path to the PICO SDK")
