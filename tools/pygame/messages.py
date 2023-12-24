@@ -13,6 +13,7 @@ class Msg(IntEnum):
     IMU         = 14
     SATNAV      = 15
     POSE        = 16
+    COMMAND     = 17
 
     @staticmethod
     def str(val):
@@ -140,4 +141,17 @@ class imu_t(Base):
         # (fmt, size, name, id)
         # name_t.__class__ already has name, do I need it again?
         return ("11fI", 48, imu_t, Msg.IMU)
+
+
+@dataclass(frozen=True)
+class command_t(Base):
+    # STANDBY = 1
+    # ARM = 2
+    # DATA_STREAM_ON = 4
+    # DATA_STREAM_OFF = 8
+    command: int
+
+    def __yivo__(self):
+        return ("B", 1, command_t, MSG.COMMAND)
+
 
