@@ -23,11 +23,13 @@ using namespace LSM6DSOX;
 using namespace BMP390;
 using namespace LIS3MDL;
 using namespace gci::sensors;
+using namespace PA1010D;
 
-gci::GPS gps;
+gci::NEMA gps_parser;
 gciLIS3MDL mag;
 gciLSM6DSOX imu;
 gciBMP390 bmp;
+gciPA1010D gps;
 // yivo::Parser yivo;
 
 TwoWire tw;
@@ -80,7 +82,7 @@ int main() {
 
   wdog.enable(WATCHDOG_RESET);
 
-  uint speed = tw.init(I2C_PORT, I2C_400KHZ, i2c_sda, i2c_scl);
+  uint speed = tw.init(I2C_400KHZ, I2C_PORT, i2c_sda, i2c_scl);
 
   printf(">> i2c instance: %u buad: %u\n", I2C_PORT, speed);
   printf(">> i2c SDA: %u SCL: %u\n", i2c_sda, i2c_scl);
@@ -120,10 +122,14 @@ int main() {
   led_init();
 
   // GPS ///////////////////////////
-  Serial1.init(9600, 1, UART1_TX_PIN, UART1_RX_PIN);
-  Serial1.write(GCI_GGA, sizeof(GCI_GGA));
-  Serial1.write(GCI_UPDATE_1HZ, sizeof(GCI_UPDATE_1HZ));
-  Serial1.write(GCI_NOANTENNA, sizeof(GCI_NOANTENNA));
+
+  // gciPA1010D gps(PA_ADDR, i2c_port); // default is 0, so don't need to do this
+  char init_command[] = "$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n";
+  gps.write(init_command, sizeof(init_command));
+  // Serial1.init(9600, 1, UART1_TX_PIN, UART1_RX_PIN);
+  // Serial1.write(GCI_GGA, sizeof(GCI_GGA));
+  // Serial1.write(GCI_UPDATE_1HZ, sizeof(GCI_UPDATE_1HZ));
+  // Serial1.write(GCI_NOANTENNA, sizeof(GCI_NOANTENNA));
   // Serial1.write(GCI_BAUD_115200, sizeof(GCI_BAUD_115200));
   // uint baud = Serial1.set_baud(115200);
   // printf("/-- UART is reset to %u baud --/\n", baud);

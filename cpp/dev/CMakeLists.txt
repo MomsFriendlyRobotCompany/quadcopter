@@ -1,15 +1,31 @@
 # set(WIFI_SSID "test" CACHE INTERNAL "secret")
 # set(WIFI_PASSWORD "test" CACHE INTERNAL "secret")
 
+# if (PICO_CYW43_SUPPORTED) # set by PICO_BOARD=pico_w
+#     if (NOT TARGET pico_cyw43_arch)
+#         message("Skipping Pico W examples as support is not available")
+#     else()
+#         message("Pico W good")
+#     endif()
+# endif()
+message(STATUS ">> {PICO_BOARD}")
 if (PICO_CYW43_SUPPORTED) # set by PICO_BOARD=pico_w
-    if (NOT TARGET pico_cyw43_arch)
-        message("Skipping Pico W examples as support is not available")
+    # if (NOT TARGET pico_cyw43_arch)
+    #     message("Skipping Pico W examples as support is not available")
+    # else()
+    if (TARGET pico_cyw43_arch)
+        message("Compiling for Pico W")
+        include(secrets.cmake)
+        LIST(APPEND libs
+            pico_cyw43_arch_lwip_threadsafe_background)
+        LIST(APPEND examples
+            udp)
     else()
-        message("Pico W good")
+        message("Skipping Pico W examples")
     endif()
 endif()
 
-include(secrets.cmake)
+# include(secrets.cmake)
 
 list(APPEND examples
     timer
@@ -45,7 +61,7 @@ foreach(app ${examples})
                 hardware_pwm
                 hardware_spi
                 hardware_rtc
-                pico_cyw43_arch_lwip_threadsafe_background
+                # pico_cyw43_arch_lwip_threadsafe_background
                 ${libs})
 
     target_include_directories(
@@ -55,16 +71,28 @@ foreach(app ${examples})
         ../src
     )
 
-    if (${app} STREQUAL "udp")
-        target_link_libraries(
-            ${app}
-                PRIVATE
-                    pico_cyw43_arch_lwip_threadsafe_background)
+    # if (${app} STREQUAL "udp")
+    #     target_link_libraries(
+    #         ${app}
+    #             PRIVATE
+    #                 pico_cyw43_arch_lwip_threadsafe_background)
 
+    #     target_compile_definitions(${app} PRIVATE
+    #         WIFI_SSID=\"${WIFI_SSID}\"
+    #         WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+    #         )
+    # endif()
+    if (TARGET pico_cyw43_arch)
         target_compile_definitions(${app} PRIVATE
             WIFI_SSID=\"${WIFI_SSID}\"
             WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
             )
+
+        target_include_directories(${app}
+            PRIVATE
+                ${CMAKE_CURRENT_LIST_DIR}
+                ../src
+        )
     endif()
 
     if (${app} STREQUAL "servopio")

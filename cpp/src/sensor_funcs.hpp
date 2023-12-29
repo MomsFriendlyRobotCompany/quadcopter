@@ -15,10 +15,12 @@
 using namespace LSM6DSOX;
 using namespace BMP390;
 using namespace LIS3MDL;
+using namespace PA1010D;
 // using namespace gci::sensors;
 
 // delared in main.cpp -------
-extern gci::GPS gps;
+extern gci::NEMA gps_parser;
+extern gciPA1010D gps;
 extern gciLIS3MDL mag;
 extern gciLSM6DSOX imu;
 extern gciBMP390 bmp;
@@ -80,25 +82,36 @@ void handle_ins_sensors() {
 void run_nav_filter() {}
 
 void handle_battery() {
-  float batt = adc.read(ADC_BATT_PIN);
+  float batt = adc.read();
   // printf("battery: %f\n", batt);
   memory.sensors += STATUS_BATTERY;
 }
 
 void handle_gps() {
   bool ok = false;
-  while (Serial1.available()) {
-    char c = (char)Serial1.read();
-    ok     = gps.read(c);
-    if (ok) break;
+  // while (Serial1.available()) {
+  //   char c = (char)Serial1.read();
+  //   ok     = gps.read(c);
+  //   if (ok) break;
+  // }
+
+  // if (ok == false) return;
+
+  char nema_buff[100]{0};
+  uint32_t num = gps.read(nema_buff); // send buffer size or vector
+  if (num == 0) return;
+
+  uint8_t id;
+  uint8_t i = 0;
+  while (i < 100) {
+    id = gps_parser.parse(nema_buff[i++]);
+    if (id > 0) break;
   }
 
-  if (ok == false) return;
-
   gga_t gga;
-  gci::GpsID id = gps.get_id();
-  if (id == gci::GpsID::GGA) {
-    ok = gps.get_msg(gga);
+  // gci::GpsID id = gps.get_id();
+  if (id == gci::GPS_GGA) {
+    ok = gps_parser.get_msg(gga);
     if (ok == false) return;
 
     memory.gps = gga;
