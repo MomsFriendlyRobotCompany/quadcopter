@@ -26,7 +26,7 @@ list(APPEND examples
     # mags
     # accels
     # iir_filter
-    udp
+    # udp
 )
 
 # message(STATUS "Examples ----------------------")
