@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 
 set(PROJECT quadcopter)
-# set(PICO_BOARD pico) # pico or pico_w
-set(PICO_BOARD pico_w)
+set(PICO_BOARD pico) # pico or pico_w
+# set(PICO_BOARD pico_w)
 set(PICO_SDK_PATH "$ENV{HOME}/github/pico-sdk")
 set(ENV{PATH} "$ENV{HOME}/github/gcc-arm/bin:$ENV{PATH}")
 set(PICO_SDK_PATH "${PICO_SDK_PATH}" CACHE PATH "Path to the PICO SDK")
@@ -78,43 +78,50 @@ FetchContent_Declare(squaternion
 # )
 
 # yivo -----------------
-FetchContent_Declare(yivo
-    GIT_REPOSITORY "https://github.com/MomsFriendlyRobotCompany/yivo.git"
-    GIT_TAG "origin/main"
-    SOURCE_SUBDIR "cpp"
-)
+# FetchContent_Declare(yivo
+#     GIT_REPOSITORY "https://github.com/MomsFriendlyRobotCompany/yivo.git"
+#     GIT_TAG "origin/main"
+#     SOURCE_SUBDIR "cpp"
+# )
 
 # gcigps -----------------
-FetchContent_Declare(gcigps
-    GIT_REPOSITORY "https://github.com/the-guild-of-calamitous-intent/gciGps.git"
-    GIT_TAG "origin/main"
-    SOURCE_SUBDIR "pico"
-)
+# FetchContent_Declare(gcigps
+#     GIT_REPOSITORY "https://github.com/the-guild-of-calamitous-intent/gciGps.git"
+#     GIT_TAG "origin/main"
+#     SOURCE_SUBDIR "pico"
+# )
 
 # gcisensors -----------------
-FetchContent_Declare(gcisensors
-    GIT_REPOSITORY "https://github.com/the-guild-of-calamitous-intent/gciSensors.git"
-    GIT_TAG "origin/main"
-)
+# FetchContent_Declare(gcisensors
+#     GIT_REPOSITORY "https://github.com/the-guild-of-calamitous-intent/gciSensors.git"
+#     GIT_TAG "origin/main"
+# )
 
 
 list(APPEND
     libs
         squaternion
-        yivo
+        # yivo
         # messages
-        gcisensors
-        gcigps
+        # gcisensors
+        # gcigps
 )
 
 FetchContent_MakeAvailable( ${libs} ) # only call this once with all libs
+
+
+include(secrets.cmake)
 
 add_executable(${PROJECT_NAME}
     src/main.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
-    PRIVATE ${CMAKE_SOURCE_DIR}/../../c_library_v2/)
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/gci_sensors
+        ${CMAKE_SOURCE_DIR}/gci_gps
+        ${CMAKE_SOURCE_DIR}/yivo
+        ${CMAKE_SOURCE_DIR}/../../c_library_v2/)
 
 target_link_libraries(
     ${PROJECT_NAME}
