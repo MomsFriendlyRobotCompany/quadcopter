@@ -5,6 +5,15 @@
     - `picolib`: eventually move to separate library, but turn `pico-sdk` C into C++
 - `c_library_v2`: download `mavlink` version 2 and put it in this folder. **Note** the `.gitignore` doesn't track it, so it is initially **missing**. You might have to rename it
 
+## `secrets.cmake`
+
+`.gitignore` doesn't save this to the repo because of sensative info.
+
+```cmake
+set(WIFI_SSID "your_password" CACHE INTERNAL "secret")
+set(WIFI_PASSWORD "your_wifi_ssid" CACHE INTERNAL "secret")
+```
+
 ## Timers
 
 | Sensor   | Readings             | Sample Rate Hz  | Timer Hz | Units |

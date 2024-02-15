@@ -1,7 +1,9 @@
 
 #pragma once
 
-
+/*
+1D Kalman Filter
+*/
 class KalmanFilter {
   float P{1.0};  // Initial estimate error
   float F{1.0};  // Assuming constant velocity

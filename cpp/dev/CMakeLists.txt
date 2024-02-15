@@ -18,8 +18,8 @@ if (PICO_CYW43_SUPPORTED) # set by PICO_BOARD=pico_w
         include(secrets.cmake)
         LIST(APPEND libs
             pico_cyw43_arch_lwip_threadsafe_background)
-        LIST(APPEND examples
-            udp)
+        # LIST(APPEND examples
+        #     udp)
     else()
         message("Skipping Pico W examples")
     endif()

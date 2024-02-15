@@ -98,7 +98,9 @@ void handle_gps() {
   // if (ok == false) return;
 
   char nema_buff[100]{0};
-  uint32_t num = gps.read(nema_buff); // send buffer size or vector
+  uint32_t num = gps.read(nema_buff, 100); // send buffer size or vector
+  printf("handle_gps num: %u\n", num);
+  printf("read good msg: %s\n", (char*)nema_buff);
   if (num == 0) return;
 
   uint8_t id;
@@ -108,6 +110,8 @@ void handle_gps() {
     if (id > 0) break;
   }
 
+  printf(">> %d\n", (int)id);
+
   gga_t gga;
   // gci::GpsID id = gps.get_id();
   if (id == gci::GPS_GGA) {
@@ -115,7 +119,6 @@ void handle_gps() {
     if (ok == false) return;
 
     memory.gps = gga;
-    // printf("GGA lat: %f lon: %f\n", gga.lat, gga.lon);
     memory.sensors += STATUS_GPS;
 
     satnav_t msg;
@@ -123,7 +126,8 @@ void handle_gps() {
     msg.lon = gga.lon;
     msg.alt = 0.0f;
 
-    yivo_gps(msg);
+    printf("GGA lat: %f lon: %f\n\n", gga.lat, gga.lon);
+    // yivo_gps(msg);
   }
 }
 

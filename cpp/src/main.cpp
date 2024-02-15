@@ -124,8 +124,9 @@ int main() {
   // GPS ///////////////////////////
 
   // gciPA1010D gps(PA_ADDR, i2c_port); // default is 0, so don't need to do this
-  char init_command[] = "$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n";
-  gps.write(init_command, sizeof(init_command));
+  // char init_command[] = "$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n";
+  // gps.write(init_command, sizeof(init_command));
+  gps.write(PMTK::GGA, sizeof(PMTK::GGA));
   // Serial1.init(9600, 1, UART1_TX_PIN, UART1_RX_PIN);
   // Serial1.write(GCI_GGA, sizeof(GCI_GGA));
   // Serial1.write(GCI_UPDATE_1HZ, sizeof(GCI_UPDATE_1HZ));
@@ -154,15 +155,15 @@ int main() {
 
   while (1) {
     if (memory.timers.is_set(TIMER_100HZ)) {
-      handle_ins_sensors();
-      run_nav_filter();
+      // handle_ins_sensors();
+      // run_nav_filter();
     }
     if (memory.timers.is_set(TIMER_10HZ)) {
-      handle_battery();
+      // handle_battery();
     }
     if (memory.timers.is_set(TIMER_1HZ)) {
       handle_gps(); // maybe move to core1?
-      handle_health();
+      // handle_health();
     }
 
     wdog.touch();
