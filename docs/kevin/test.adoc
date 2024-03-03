@@ -1,8 +1,56 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
 = Test
+
+[NOTE]
+====
+A sample note admonition.
+We can use gemoji icons in the Asciidoctor markup.
+We assign an icon name to the document
+attributes `tip-caption`, `note-caption` and `important-caption`.
+====
+ 
+TIP: It works!
+ 
+IMPORTANT: Asciidoctor is awesome, don't forget!
+ 
+CAUTION: Don't forget to add the `...-caption` document attributes in the header of the document on GitHub.
+ 
+WARNING: You have no reason not to use Asciidoctor.
 
 image::http://asciidoctor.org/images/octocat.jpg[Sunset, 100, 100]
 
+[source]
+----
+@startuml
+class Car
+Driver - Car : drives >
+Car *- Wheel : have 4 >
+Car -- Person : < owns
+@enduml
+----
+
+@startuml
+class Car
+Driver - Car : drives >
+Car *- Wheel : have 4 >
+Car -- Person : < owns
+@enduml
+
 == Pyton
+
+latexmath:[C = \alpha + \beta Y^{\gamma} + \epsilon]
+
+[stem]
+++++
+sqrt(4) = 2
+++++
 
 ```python
 from math import sin, cos
@@ -31,5 +79,10 @@ end
 --
 
 $$
-c^2 = a^2 + b^2.
+c^2 = a^2 + b^2 \\
+x = \sin(\omega t)
 $$
+
+----
+$ asciidoctor -b html5 recommended-practices.adoc
+----
