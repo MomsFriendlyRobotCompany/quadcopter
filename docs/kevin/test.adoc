@@ -1,0 +1,35 @@
+= Test
+
+image::http://asciidoctor.org/images/octocat.jpg[Sunset, 100, 100]
+
+== Pyton
+
+```python
+from math import sin, cos
+
+def bob(a):
+  """Something"""
+  return a
+```
+
+```cpp
+class Bob {
+public:
+  Bob(){}
+};
+```
+
+[env.code#iter]
+--
+def iter(f, a, n)
+  n.times do
+    a = f.call(a)
+    puts a
+  end
+  return  a
+end
+--
+
+$$
+c^2 = a^2 + b^2.
+$$
