@@ -12,6 +12,7 @@ yivo = true
 mavlink = false
 
 [global.ids]
-
-imu_t = 20
-calibration_t = 21
+heartbeat = 20
+imu_raw_t = 40
+imu_t = 41
+calibration_t = 40

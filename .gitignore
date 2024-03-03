@@ -11,6 +11,9 @@ video_odometry/jupyter/arducam/*.pkl
 *.pkl
 old
 
+messages/cpp
+messages/python
+
 archive
 MadgwickAHRS*
 other

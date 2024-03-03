@@ -8,11 +8,20 @@ pressure = 8
 temperature = 16
 
 [message]
-vec_t-accel = [0,0,0]
-vec_t-gyro = [0,0,0]
-vec_t-mag = [0,0,0]
-float-imu_temperature = 0
-float-pressure = 0
-float-temperature = 0
-uint32-timestamp = 0
+accel = {type = "vec", default = [0,0,0]}
+gyro = {type = "vec", default = [0,0,0]}
+mag = {type = "vec", default = [0,0,0]}
+imu_temperature = "float"
+pressure = "float"
+temperature = "float"
+timestamp = "uint32"
+
+# vec-accel = 1
+# vec-gyro = 1
+# vec-mag = 1
+# float-imu_temperature = 1
+# float-pressure = 1
+# float-temperature = 1
+# uint32-timestamp = 1
+
 name = "imu_t"
