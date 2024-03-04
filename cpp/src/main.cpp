@@ -12,6 +12,7 @@
 #include "led.hpp"
 #include "main_core_1.hpp"
 #include "memory.hpp"
+#include "states.hpp"
 
 #include <gciSensors.hpp>
 #include <gcigps.hpp>
@@ -39,7 +40,8 @@ ADC adc;
 SPI spi;
 WatchDog wdog; // not sure how useful this is
 
-SharedMemory_t memory;
+extern SharedMemory_t memory;
+extern SystemState_t sysstate;
 Mutex sm_mutex;
 
 Servo m0;
@@ -154,17 +156,24 @@ int main() {
   multicore_launch_core1(main_core_1);
 
   while (1) {
-    if (memory.timers.is_set(TIMER_100HZ)) {
-      // handle_ins_sensors();
-      // run_nav_filter();
+    // if (sysstate.current_state == SS_BOOT) {
+    //   // calibrate
+    // }
+    if (sysstate.telemetry == true) {
+      if (memory.timers.is_set(TIMER_100HZ)) {
+        // handle_ins_sensors();
+        // run_nav_filter();
+      }
+      if (memory.timers.is_set(TIMER_10HZ)) {
+        // handle_battery();
+      }
+      if (memory.timers.is_set(TIMER_1HZ)) {
+        handle_gps(); // maybe move to core1?
+        // handle_health();
+      }
     }
-    if (memory.timers.is_set(TIMER_10HZ)) {
-      // handle_battery();
-    }
-    if (memory.timers.is_set(TIMER_1HZ)) {
-      handle_gps(); // maybe move to core1?
-      // handle_health();
-    }
+
+    update_state(sysstate);
 
     wdog.touch();
   }

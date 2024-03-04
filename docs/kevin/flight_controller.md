@@ -46,3 +46,36 @@ stateDiagram-v2
         hold --> [*]: takeoff
     }
 ```
+
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Passive: boot
+    Passive --> Active: arm true
+    Active --> Passive: arm false
+    Passive --> Safe: shutdown true
+    Safe --> [*]
+
+
+    state Active {
+        [*] --> ESC: arm true
+        ESC --> Land: arm true
+        Land --> Fly: takeoff true
+        Fly --> Land: takeoff false
+        Land --> ESC: arm false
+        ESC --> [*]: arm false
+    }
+
+    state Passive {
+        state if_cal <<choice>>
+        [*] --> if_cal: boot
+        if_cal --> calibrate: calibrated False
+        if_cal --> Idle: calibrated True
+        calibrate --> Idle: calibrated True
+        Idle --> calibrate: calibrated False
+        Idle --> safe: shutdown true
+        Idle --> active: arm true
+        [*] --> Idle: arm false
+    }
+```

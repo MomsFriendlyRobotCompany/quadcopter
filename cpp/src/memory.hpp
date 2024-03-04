@@ -61,3 +61,6 @@ struct SharedMemory_t {
   BitFlag timers;
   BitFlag sensors;
 };
+
+
+SharedMemory_t memory;
